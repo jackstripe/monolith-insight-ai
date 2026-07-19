@@ -1,6 +1,7 @@
 package com.monolithinsight.infrastructure;
 
 import com.monolithinsight.domain.JavaClassInfo;
+import com.monolithinsight.domain.JavaFieldInfo;
 import com.monolithinsight.domain.ProjectAnalysis;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -104,6 +105,145 @@ public class JavaParserProjectAnalyzerTest {
         assertThrows(
                 IllegalArgumentException.class,
                 () -> analyzer.analyze(file)
+        );
+    }
+
+    @Test
+    void shouldFindOnlyJavaFiles() throws IOException {
+        Path sourceFile = tempDir.resolve("UserService.java");
+        Files.writeString(sourceFile, """
+                package com.example.service;
+
+                public class UserService {
+
+                    public void createUser() {
+                    }
+
+                    public String findUser() {
+                        return "user";
+                    }
+                }
+                """);
+        Path sourceFileAnotherJavaFile = tempDir.resolve("UserServic2e.java");
+        Files.writeString(sourceFileAnotherJavaFile, """
+                package com.example.service;
+
+                public class UserServic2e {
+
+                    public void createUser() {
+                    }
+
+                    public String findUser() {
+                        return "user";
+                    }
+                }
+                """);
+        Path sourceFileTxt = tempDir.resolve("UserService.txt");
+        Path sourceFileBin = tempDir.resolve("UserService.bin");
+        Path sourceFileReadMe = tempDir.resolve("UserService.md");
+
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        assertEquals(2, result.javaFileCount());
+        assertEquals(2, result.classes().size());
+
+
+    }
+    @Test
+    void shouldExtractConstructors() throws IOException {
+        Path sourceFile = tempDir.resolve("OrderService.java");
+
+        Files.writeString(sourceFile, """
+            package com.example;
+
+            public class OrderService {
+
+                public OrderService() {
+                }
+
+                public OrderService(String name, int retryCount) {
+                }
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertEquals(2, classInfo.constructors().size());
+        assertTrue(
+                classInfo.constructors()
+                        .contains("public OrderService()")
+        );
+        assertTrue(
+                classInfo.constructors()
+                        .contains(
+                                "public OrderService(String name, int retryCount)"
+                        )
+        );
+    }
+    @Test
+    void shouldExtractFieldsAndTheirTypes() throws IOException {
+        Path sourceFile = tempDir.resolve("OrderService.java");
+
+        Files.writeString(sourceFile, """
+            package com.example;
+
+            public class OrderService {
+
+                private final OrderRepository repository;
+                private String serviceName;
+                private int minimum, maximum;
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertEquals(4, classInfo.fields().size());
+
+        assertTrue(classInfo.fields().contains(
+                new  JavaFieldInfo("repository", "OrderRepository")
+        ));
+
+        assertTrue(classInfo.fields().contains(
+                new JavaFieldInfo("serviceName", "String")
+        ));
+
+        assertTrue(classInfo.fields().contains(
+                new JavaFieldInfo("minimum", "int")
+        ));
+
+        assertTrue(classInfo.fields().contains(
+                new JavaFieldInfo("maximum", "int")
+        ));
+    }
+
+    @Test
+    void shouldExtractAnnotations() throws IOException {
+        Path sourceFile = tempDir.resolve("OrderService.java");
+
+        Files.writeString(sourceFile, """
+            package com.example;
+
+            @Service
+            public class OrderService {
+
+                public OrderService() {
+                }
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertEquals(1, classInfo.annotations().size());
+        assertTrue(
+                classInfo.annotations()
+                        .contains("Service")
         );
     }
 }

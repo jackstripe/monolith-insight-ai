@@ -6,7 +6,11 @@ public record JavaClassInfo(
         String packageName,
         String className,
         String type,
-        List<String> methods
+        List<String> annotations,
+        List<String> constructors,
+        List<JavaFieldInfo> fields,
+        List<String> methods,
+        String filePath
 ) {
 
 

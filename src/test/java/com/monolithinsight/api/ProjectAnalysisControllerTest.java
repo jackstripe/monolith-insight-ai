@@ -37,6 +37,9 @@ class ProjectAnalysisControllerTest {
                                 "com.example",
                                 "UserService",
                                 "CLASS",
+                                List.of("Service"),
+                                List.of(""),
+                                List.of(),
                                 List.of("createUser")
                         )
                 )
