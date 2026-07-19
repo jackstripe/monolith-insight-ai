@@ -40,9 +40,11 @@ class ProjectAnalysisControllerTest {
                                 List.of("Service"),
                                 List.of(""),
                                 List.of(),
-                                List.of("createUser")
+                                List.of("createUser"),
+                                "src/main/java/com/example/service"
                         )
-                )
+                ),
+                List.of()
         );
 
         when(useCase.execute(anyString())).thenReturn(response);

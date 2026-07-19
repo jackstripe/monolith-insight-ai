@@ -1,6 +1,10 @@
 package com.monolithinsight.infrastructure;
 
+import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.monolithinsight.application.ProjectAnalyzer;
+import com.monolithinsight.domain.AnalysisError;
 import com.monolithinsight.domain.JavaClassInfo;
 import com.monolithinsight.domain.JavaFieldInfo;
 import com.monolithinsight.domain.ProjectAnalysis;
@@ -15,12 +19,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
 
+import static java.util.stream.Collectors.toList;
+
 @Component
 public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
+
+    private record FileAnalysisResult(
+            List<JavaClassInfo> classes,
+            List<AnalysisError> errors
+    ) {
+    }
     @Override
     public ProjectAnalysis analyze(Path projectPath) {
         validateProjectPath(projectPath);
         List<JavaClassInfo> classes = new ArrayList<>();
+        List<AnalysisError> errors = new ArrayList<>();
+
         try (var files = Files.walk(projectPath)) {
             List<Path> javaFiles = files
                     .filter(Files::isRegularFile)
@@ -29,12 +43,17 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                     .toList();
 
             for (Path javaFile : javaFiles) {
-                classes.addAll(parseFile(javaFile));
+                FileAnalysisResult result =
+                        parseFile(projectPath, javaFile);
+
+                classes.addAll(result.classes());
+                errors.addAll(result.errors());
             }
             return new ProjectAnalysis(
                     projectPath.getFileName().toString(),
                     javaFiles.size(),
-                    classes ); }
+                    classes,
+                    errors  ); }
         catch (IOException exception) {
             throw new ProjectAnalysisException(
                     "Could not analyze project: " + projectPath, exception );
@@ -42,18 +61,45 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
 
     }
 
-    private List<JavaClassInfo> parseFile(Path javaFile) {
-        String filePath = javaFile.getFileSystem().toString();
-        try { CompilationUnit compilationUnit = StaticJavaParser.parse(javaFile);
+    private FileAnalysisResult  parseFile(Path projectPath,
+                                          Path javaFile) {
+
+        String relativePath = projectPath
+                .relativize(javaFile)
+                .normalize()
+                .toString()
+                .replace('\\', '/');
+
+        try {
+            CompilationUnit compilationUnit = StaticJavaParser.parse(javaFile);
             String packageName = compilationUnit
                     .getPackageDeclaration()
                     .map(declaration -> declaration.getNameAsString())
                     .orElse("");
-            return compilationUnit.getTypes()
-                    .stream() .map(type -> toClassInfo(packageName, type,filePath))
+            List<JavaClassInfo> classes = compilationUnit
+                    .getTypes()
+                    .stream()
+                    .map(type -> toClassInfo(
+                            packageName,
+                            type,
+                            relativePath
+                    ))
                     .toList();
+
+            return new FileAnalysisResult(
+                    classes,
+                    List.of()
+            );
         } catch (Exception exception) {
-        throw new ProjectAnalysisException( "Could not parse Java file: " + javaFile, exception );
+            return new FileAnalysisResult(
+                    List.of(),
+                    List.of(
+                            new AnalysisError(
+                                    relativePath,
+                                    exception.getMessage()
+                            )
+                    )
+            );
         }
     }
 
@@ -73,7 +119,26 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
         return "CLASS";
     }
 
-    private JavaClassInfo toClassInfo( String packageName, TypeDeclaration<?> type , String filePath) {
+    private List<TypeDeclaration<?>> findInnerTypes(
+            TypeDeclaration<?> type
+    ) {
+
+        List<TypeDeclaration<?>> result = new ArrayList<>();
+
+        for (BodyDeclaration<?> member : type.getMembers()) {
+
+            if (member instanceof TypeDeclaration<?> nestedType) {
+
+                result.add(nestedType);
+
+                result.addAll(findInnerTypes(nestedType));
+            }
+        }
+
+        return result;
+    }
+
+    private JavaClassInfo toClassInfo( String packageName, TypeDeclaration<?> type , String relativePath) {
         List<String> methods = type.getMethods()
                 .stream()
                 .map(method -> method.getNameAsString())
@@ -101,7 +166,8 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                 constructors,
                 fields,
                 methods,
-                filePath);
+                relativePath
+        );
     }
 
     private List<String> extractConstructors(TypeDeclaration<?> type) {

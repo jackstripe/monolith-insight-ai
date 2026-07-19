@@ -246,4 +246,77 @@ public class JavaParserProjectAnalyzerTest {
                         .contains("Service")
         );
     }
+
+    @Test
+    void shouldIncludeRelativeFilePath() throws IOException {
+        Path sourceDirectory = tempDir.resolve(
+                "src/main/java/com/example/service"
+        );
+
+        Files.createDirectories(sourceDirectory);
+
+        Path sourceFile = sourceDirectory.resolve("OrderService.java");
+
+        Files.writeString(sourceFile, """
+            package com.example.service;
+
+            public class OrderService {
+
+                public void createOrder() {
+                }
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        assertEquals(1, result.classes().size());
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertEquals(
+                "src/main/java/com/example/service/OrderService.java",
+                classInfo.filePath()
+        );
+    }
+    @Test
+    void shouldContinueAnalysisWhenOneFileCannotBeParsed()
+            throws IOException {
+
+        Files.writeString(
+                tempDir.resolve("ValidClass.java"),
+                """
+                public class ValidClass {
+                }
+                """
+        );
+
+        Files.writeString(
+                tempDir.resolve("InvalidClass.java"),
+                """
+                public class InvalidClass {
+                """
+        );
+
+        Files.writeString(
+                tempDir.resolve("AnotherInvalidClass.java"),
+                """
+                public class AnotherInvalidClass {
+                """
+        );
+
+
+        ProjectAnalysis result =
+                analyzer.analyze(tempDir);
+
+        assertEquals(3, result.javaFileCount());
+        assertEquals(1, result.classes().size());
+        assertEquals("ValidClass",
+                result.classes().getFirst().className());
+
+        assertEquals(2, result.errors().size());
+        assertEquals(
+                "AnotherInvalidClass.java",
+                result.errors().getFirst().filePath()
+        );
+    }
 }

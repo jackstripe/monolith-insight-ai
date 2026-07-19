@@ -5,6 +5,7 @@ import java.util.List;
 public record ProjectAnalysis(
         String projectName,
         int javaFileCount,
-        List<JavaClassInfo> classes
+        List<JavaClassInfo> classes,
+        List<AnalysisError> errors
 ) {
 }

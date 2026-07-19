@@ -30,6 +30,7 @@ public class AnalyzeProjectUseCaseTest {
         ProjectAnalysis expected = new ProjectAnalysis(
                 "sample",
                 0,
+                List.of(),
                 List.of()
         );
 
