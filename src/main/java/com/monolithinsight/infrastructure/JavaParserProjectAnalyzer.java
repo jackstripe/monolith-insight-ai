@@ -1,8 +1,5 @@
 package com.monolithinsight.infrastructure;
 
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.monolithinsight.application.ProjectAnalyzer;
 import com.monolithinsight.domain.AnalysisError;
 import com.monolithinsight.domain.JavaClassInfo;
@@ -19,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
 
-import static java.util.stream.Collectors.toList;
 
 @Component
 public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
@@ -96,6 +92,7 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                     List.of(
                             new AnalysisError(
                                     relativePath,
+                                    exception.getClass().getSimpleName(),
                                     exception.getMessage()
                             )
                     )
@@ -117,25 +114,6 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
             return "INTERFACE";
         }
         return "CLASS";
-    }
-
-    private List<TypeDeclaration<?>> findInnerTypes(
-            TypeDeclaration<?> type
-    ) {
-
-        List<TypeDeclaration<?>> result = new ArrayList<>();
-
-        for (BodyDeclaration<?> member : type.getMembers()) {
-
-            if (member instanceof TypeDeclaration<?> nestedType) {
-
-                result.add(nestedType);
-
-                result.addAll(findInnerTypes(nestedType));
-            }
-        }
-
-        return result;
     }
 
     private JavaClassInfo toClassInfo( String packageName, TypeDeclaration<?> type , String relativePath) {

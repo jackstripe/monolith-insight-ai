@@ -1,5 +1,6 @@
 package com.monolithinsight.infrastructure;
 
+import com.monolithinsight.domain.AnalysisError;
 import com.monolithinsight.domain.JavaClassInfo;
 import com.monolithinsight.domain.JavaFieldInfo;
 import com.monolithinsight.domain.ProjectAnalysis;
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -142,6 +144,9 @@ public class JavaParserProjectAnalyzerTest {
         Path sourceFileBin = tempDir.resolve("UserService.bin");
         Path sourceFileReadMe = tempDir.resolve("UserService.md");
 
+        Files.writeString(sourceFileTxt, "not Java");
+        Files.writeString(sourceFileBin, "binary-ish content");
+        Files.writeString(sourceFileReadMe, "# README");
 
         ProjectAnalysis result = analyzer.analyze(tempDir);
 
@@ -314,9 +319,15 @@ public class JavaParserProjectAnalyzerTest {
                 result.classes().getFirst().className());
 
         assertEquals(2, result.errors().size());
-        assertEquals(
-                "AnotherInvalidClass.java",
-                result.errors().getFirst().filePath()
+
+        assertTrue(result.errors().stream()
+                .map(AnalysisError::filePath)
+                .toList()
+                .containsAll(List.of(
+                        "InvalidClass.java",
+                        "AnotherInvalidClass.java"
+                )
+                )
         );
     }
 }

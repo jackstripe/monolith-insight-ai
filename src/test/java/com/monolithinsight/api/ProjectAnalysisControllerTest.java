@@ -1,6 +1,7 @@
 package com.monolithinsight.api;
 
 import com.monolithinsight.application.AnalyzeProjectUseCase;
+import com.monolithinsight.domain.AnalysisError;
 import com.monolithinsight.domain.JavaClassInfo;
 import com.monolithinsight.domain.ProjectAnalysis;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ class ProjectAnalysisControllerTest {
                                 List.of(""),
                                 List.of(),
                                 List.of("createUser"),
-                                "src/main/java/com/example/service"
+                                "src/main/java/com/example/service/UserService.java"
                         )
                 ),
                 List.of()
@@ -64,7 +65,61 @@ class ProjectAnalysisControllerTest {
                 .andExpect(jsonPath("$.classes[0].className")
                         .value("UserService"))
                 .andExpect(jsonPath("$.classes[0].packageName")
-                        .value("com.example"));
+                        .value("com.example"))
+                .andExpect(jsonPath("$.classes[0].filePath")
+                        .value("src/main/java/com/example/service/UserService.java"))
+                .andExpect(jsonPath("$.errors").isArray())
+                .andExpect(jsonPath("$.errors").isEmpty());
+        ;
+    }
+
+    @Test
+    void shouldAnalyzeProjectDetectBrokenJavaClass() throws Exception {
+        ProjectAnalysis response = new ProjectAnalysis(
+                "sample-project",
+                2,
+                List.of(
+                        new JavaClassInfo(
+                                "com.example",
+                                "UserService",
+                                "CLASS",
+                                List.of("Service"),
+                                List.of(""),
+                                List.of(),
+                                List.of("createUser"),
+                                "src/main/java/com/example/service/UserService.java"
+                        )
+                ),
+                List.of(new AnalysisError(
+                        "src/main/java/Broken.java",
+                        "error type",
+                        "Parse error"
+                ))
+        );
+
+        when(useCase.execute(anyString())).thenReturn(response);
+
+        mockMvc.perform(post("/api/analysis")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "projectPath": "C:/projects/sample-project"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.projectName")
+                        .value("sample-project"))
+                .andExpect(jsonPath("$.javaFileCount")
+                        .value(2))
+                .andExpect(jsonPath("$.classes[0].className")
+                        .value("UserService"))
+                .andExpect(jsonPath("$.classes[0].packageName")
+                        .value("com.example"))
+                .andExpect(jsonPath("$.classes[0].filePath")
+                        .value("src/main/java/com/example/service/UserService.java"))
+                .andExpect(jsonPath("$.errors").isArray())
+                .andExpect(jsonPath("$.errors").isNotEmpty());
+        ;
     }
 
     @Test
@@ -72,10 +127,10 @@ class ProjectAnalysisControllerTest {
         mockMvc.perform(post("/api/analysis")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                            {
-                              "projectPath": ""
-                            }
-                            """))
+                                {
+                                  "projectPath": ""
+                                }
+                                """))
                 .andExpect(status().isBadRequest());
     }
 }
