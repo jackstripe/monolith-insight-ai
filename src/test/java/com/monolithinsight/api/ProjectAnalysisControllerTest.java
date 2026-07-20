@@ -70,7 +70,6 @@ class ProjectAnalysisControllerTest {
                         .value("src/main/java/com/example/service/UserService.java"))
                 .andExpect(jsonPath("$.errors").isArray())
                 .andExpect(jsonPath("$.errors").isEmpty());
-        ;
     }
 
     @Test
@@ -119,7 +118,6 @@ class ProjectAnalysisControllerTest {
                         .value("src/main/java/com/example/service/UserService.java"))
                 .andExpect(jsonPath("$.errors").isArray())
                 .andExpect(jsonPath("$.errors").isNotEmpty());
-        ;
     }
 
     @Test
