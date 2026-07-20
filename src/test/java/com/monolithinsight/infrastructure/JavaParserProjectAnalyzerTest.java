@@ -1,5 +1,6 @@
 package com.monolithinsight.infrastructure;
 
+import com.monolithinsight.domain.AnalysisError;
 import com.monolithinsight.domain.JavaClassInfo;
 import com.monolithinsight.domain.JavaFieldInfo;
 import com.monolithinsight.domain.ProjectAnalysis;
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -142,6 +144,9 @@ public class JavaParserProjectAnalyzerTest {
         Path sourceFileBin = tempDir.resolve("UserService.bin");
         Path sourceFileReadMe = tempDir.resolve("UserService.md");
 
+        Files.writeString(sourceFileTxt, "not Java");
+        Files.writeString(sourceFileBin, "binary-ish content");
+        Files.writeString(sourceFileReadMe, "# README");
 
         ProjectAnalysis result = analyzer.analyze(tempDir);
 
@@ -244,6 +249,85 @@ public class JavaParserProjectAnalyzerTest {
         assertTrue(
                 classInfo.annotations()
                         .contains("Service")
+        );
+    }
+
+    @Test
+    void shouldIncludeRelativeFilePath() throws IOException {
+        Path sourceDirectory = tempDir.resolve(
+                "src/main/java/com/example/service"
+        );
+
+        Files.createDirectories(sourceDirectory);
+
+        Path sourceFile = sourceDirectory.resolve("OrderService.java");
+
+        Files.writeString(sourceFile, """
+            package com.example.service;
+
+            public class OrderService {
+
+                public void createOrder() {
+                }
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        assertEquals(1, result.classes().size());
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertEquals(
+                "src/main/java/com/example/service/OrderService.java",
+                classInfo.filePath()
+        );
+    }
+    @Test
+    void shouldContinueAnalysisWhenOneFileCannotBeParsed()
+            throws IOException {
+
+        Files.writeString(
+                tempDir.resolve("ValidClass.java"),
+                """
+                public class ValidClass {
+                }
+                """
+        );
+
+        Files.writeString(
+                tempDir.resolve("InvalidClass.java"),
+                """
+                public class InvalidClass {
+                """
+        );
+
+        Files.writeString(
+                tempDir.resolve("AnotherInvalidClass.java"),
+                """
+                public class AnotherInvalidClass {
+                """
+        );
+
+
+        ProjectAnalysis result =
+                analyzer.analyze(tempDir);
+
+        assertEquals(3, result.javaFileCount());
+        assertEquals(1, result.classes().size());
+        assertEquals("ValidClass",
+                result.classes().getFirst().className());
+
+        assertEquals(2, result.errors().size());
+
+        assertTrue(result.errors().stream()
+                .map(AnalysisError::filePath)
+                .toList()
+                .containsAll(List.of(
+                        "InvalidClass.java",
+                        "AnotherInvalidClass.java"
+                )
+                )
         );
     }
 }

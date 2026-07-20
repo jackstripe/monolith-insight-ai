@@ -1,4 +1,7 @@
 package com.monolithinsight.domain;
 
-public class AnalysisError {
+public record AnalysisError(
+        String filePath,
+        String errorType,
+        String message) {
 }
