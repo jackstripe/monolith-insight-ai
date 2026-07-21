@@ -1,9 +1,8 @@
 package com.monolithinsight.api;
 
 import com.monolithinsight.application.AnalyzeProjectUseCase;
-import com.monolithinsight.domain.AnalysisError;
-import com.monolithinsight.domain.JavaClassInfo;
-import com.monolithinsight.domain.ProjectAnalysis;
+import com.monolithinsight.application.BuildProjectGraphUseCase;
+import com.monolithinsight.domain.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -27,6 +26,8 @@ class ProjectAnalysisControllerTest {
 
     @MockitoBean
     private AnalyzeProjectUseCase useCase;
+    @MockitoBean
+    private BuildProjectGraphUseCase buildProjectGraphUseCase;
 
     @Test
     void shouldAnalyzeProject() throws Exception {
@@ -130,5 +131,88 @@ class ProjectAnalysisControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest());
+    }
+    @Test
+    void shouldBuildProjectGraph() throws Exception {
+        ProjectAnalysis analysis  = new ProjectAnalysis(
+                "sample-project",
+                1,
+                List.of(
+                        new JavaClassInfo(
+                                "com.example",
+                                "UserService",
+                                "CLASS",
+                                List.of("Service"),
+                                List.of(""),
+                                List.of(),
+                                List.of("createUser"),
+                                "src/main/java/com/example/service/UserService.java"
+                        )
+                ),
+                List.of()
+        );
+        JavaClassInfo orderService = createClass(
+                "com.example.orders",
+                "OrderService"
+        );
+
+        JavaClassInfo orderRepository = createClass(
+                "com.example.orders",
+                "OrderRepository"
+        );
+
+        ClassNode orderServiceNode = ClassNode.from(orderService);
+
+        ClassNode orderRepositoryNode = ClassNode.from(orderRepository);
+
+        ProjectGraph graph = new ProjectGraph(
+                List.of(
+                        orderServiceNode,
+                        orderRepositoryNode
+                ),
+                List.of(
+                        new ClassDependency(
+                                orderServiceNode.id(),
+                                orderRepositoryNode.id(),
+                                DependencyType.FIELD
+                        )
+                )
+        );
+
+        when(useCase.execute(anyString()))
+                .thenReturn(analysis);
+
+        when(buildProjectGraphUseCase.execute(analysis))
+                .thenReturn(graph);
+
+        mockMvc.perform(post("/api/graph")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                              "projectPath": "C:/projects/sample"
+                            }
+                            """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nodes").isArray())
+                .andExpect(jsonPath("$.dependencies").isArray());
+    }
+    private JavaClassInfo createClass(
+            String packageName,
+            String className
+    ) {
+        return new JavaClassInfo(
+                packageName,
+                className,
+                "CLASS",
+                List.of(),
+                List.of(),
+                List.of(),
+                List.of(),
+                "src/main/java/"
+                        + packageName.replace('.', '/')
+                        + "/"
+                        + className
+                        + ".java"
+        );
     }
 }

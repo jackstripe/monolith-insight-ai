@@ -1,4 +1,5 @@
 package com.monolithinsight.domain;
 
-public class DependencyType {
+public enum DependencyType {
+    FIELD
 }

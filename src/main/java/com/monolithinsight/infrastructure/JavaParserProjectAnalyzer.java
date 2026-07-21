@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
 
-
 @Component
 public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
 
@@ -123,6 +122,7 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                 .toList();
         List<String> constructors = extractConstructors(type);
 
+
         List<JavaFieldInfo> fields = type.getFields()
                 .stream()
                 .flatMap(fieldDeclaration ->
@@ -131,6 +131,7 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                 .map(variable -> new JavaFieldInfo(
                         variable.getNameAsString(),
                         variable.getTypeAsString()
+
                 ))
                 .toList();
         List<String> annotations =  type.getAnnotations()
