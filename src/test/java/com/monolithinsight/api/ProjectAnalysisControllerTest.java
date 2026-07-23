@@ -162,6 +162,14 @@ class ProjectAnalysisControllerTest {
                             """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nodes").isArray())
-                .andExpect(jsonPath("$.dependencies").isArray());
+                .andExpect(jsonPath("$.dependencies").isArray())
+                .andExpect(jsonPath("$.nodes.length()").value(2))
+                .andExpect(jsonPath("$.dependencies.length()").value(1))
+                .andExpect(jsonPath("$.dependencies[0].sourceNodeId")
+                        .value("com.example.orders.OrderService"))
+                .andExpect(jsonPath("$.dependencies[0].targetNodeId")
+                        .value("com.example.orders.OrderRepository"))
+                .andExpect(jsonPath("$.dependencies[0].type")
+                        .value("FIELD"));
     }
 }

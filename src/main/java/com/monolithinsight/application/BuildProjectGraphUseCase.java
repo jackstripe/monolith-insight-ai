@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 public class BuildProjectGraphUseCase {
 
     public ProjectGraph execute(ProjectAnalysis project){
-        log.info("Starting creation of the graph for for project: {}", project.projectName());
+        log.info("Starting creation of the graph for project: {}", project.projectName());
 
         List<ClassNode> nodes = project.classes()
                 .stream()
@@ -22,6 +22,13 @@ public class BuildProjectGraphUseCase {
         Map<String, List<ClassNode>> simpleNameIndex = buildSimpleNameIndex(nodes);
         List<ClassDependency> dependencies = resolveFieldDependencies(nodes,simpleNameIndex);
 
+        log.info(
+                "Graph created. Nodes: {}, dependencies: {}",
+                nodes.size(),
+                dependencies.size()
+        );
+
+        log.debug("Resolved dependencies: {}", dependencies);
         return new ProjectGraph(nodes,dependencies);
     }
 
@@ -48,7 +55,6 @@ public class BuildProjectGraphUseCase {
                                 field.type(),
                                 List.of()
                         );
-                //log.info("Candidates: {}", candidates.getFirst().id());
                 if (candidates.size() == 1) {
                     ClassNode targetNode = candidates.getFirst();
                     if(!Objects.equals(sourceNode.id(), targetNode.id())) {
@@ -64,7 +70,6 @@ public class BuildProjectGraphUseCase {
                 }
             }
         }
-        log.info("Dependencies: {}", dependencies);
         return new ArrayList<>(dependencies);
     }
 }

@@ -2,13 +2,12 @@ package com.monolithinsight.support;
 
 import com.monolithinsight.domain.JavaClassInfo;
 import com.monolithinsight.domain.JavaFieldInfo;
-import com.monolithinsight.domain.ProjectAnalysis;
-import com.monolithinsight.domain.ProjectGraph;
-
 import java.util.List;
 
 public class TestFixtures {
 
+    private TestFixtures() {
+    }
     public static JavaClassInfo createClass( String packageName,
                                                         String className){
 
