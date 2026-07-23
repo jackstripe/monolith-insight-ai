@@ -12,6 +12,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static com.monolithinsight.support.TestFixtures.createClass;
+import static com.monolithinsight.support.TestFixtures.createUserService;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -34,18 +36,7 @@ class ProjectAnalysisControllerTest {
         ProjectAnalysis response = new ProjectAnalysis(
                 "sample-project",
                 1,
-                List.of(
-                        new JavaClassInfo(
-                                "com.example",
-                                "UserService",
-                                "CLASS",
-                                List.of("Service"),
-                                List.of(""),
-                                List.of(),
-                                List.of("createUser"),
-                                "src/main/java/com/example/service/UserService.java"
-                        )
-                ),
+                List.of(createUserService()),
                 List.of()
         );
 
@@ -78,18 +69,7 @@ class ProjectAnalysisControllerTest {
         ProjectAnalysis response = new ProjectAnalysis(
                 "sample-project",
                 2,
-                List.of(
-                        new JavaClassInfo(
-                                "com.example",
-                                "UserService",
-                                "CLASS",
-                                List.of("Service"),
-                                List.of(""),
-                                List.of(),
-                                List.of("createUser"),
-                                "src/main/java/com/example/service/UserService.java"
-                        )
-                ),
+                List.of(createUserService()),
                 List.of(new AnalysisError(
                         "src/main/java/Broken.java",
                         "error type",
@@ -137,18 +117,7 @@ class ProjectAnalysisControllerTest {
         ProjectAnalysis analysis  = new ProjectAnalysis(
                 "sample-project",
                 1,
-                List.of(
-                        new JavaClassInfo(
-                                "com.example",
-                                "UserService",
-                                "CLASS",
-                                List.of("Service"),
-                                List.of(""),
-                                List.of(),
-                                List.of("createUser"),
-                                "src/main/java/com/example/service/UserService.java"
-                        )
-                ),
+                List.of(createUserService()),
                 List.of()
         );
         JavaClassInfo orderService = createClass(
@@ -162,7 +131,6 @@ class ProjectAnalysisControllerTest {
         );
 
         ClassNode orderServiceNode = ClassNode.from(orderService);
-
         ClassNode orderRepositoryNode = ClassNode.from(orderRepository);
 
         ProjectGraph graph = new ProjectGraph(
@@ -195,24 +163,5 @@ class ProjectAnalysisControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.nodes").isArray())
                 .andExpect(jsonPath("$.dependencies").isArray());
-    }
-    private JavaClassInfo createClass(
-            String packageName,
-            String className
-    ) {
-        return new JavaClassInfo(
-                packageName,
-                className,
-                "CLASS",
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                "src/main/java/"
-                        + packageName.replace('.', '/')
-                        + "/"
-                        + className
-                        + ".java"
-        );
     }
 }
