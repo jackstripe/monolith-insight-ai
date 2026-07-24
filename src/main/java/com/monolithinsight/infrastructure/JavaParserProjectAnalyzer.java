@@ -15,8 +15,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
+import lombok.extern.slf4j.Slf4j;
 
-
+@Slf4j
 @Component
 public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
 
@@ -27,6 +28,7 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
     }
     @Override
     public ProjectAnalysis analyze(Path projectPath) {
+        log.info("Starting analyze for project: {}", projectPath.getFileName().toString());
         validateProjectPath(projectPath);
         List<JavaClassInfo> classes = new ArrayList<>();
         List<AnalysisError> errors = new ArrayList<>();
@@ -45,6 +47,8 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                 classes.addAll(result.classes());
                 errors.addAll(result.errors());
             }
+            log.info("Finished analysis for project: {} Number of Files: {}",
+                    projectPath.getFileName().toString(), javaFiles.size());
             return new ProjectAnalysis(
                     projectPath.getFileName().toString(),
                     javaFiles.size(),
@@ -123,6 +127,7 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                 .toList();
         List<String> constructors = extractConstructors(type);
 
+
         List<JavaFieldInfo> fields = type.getFields()
                 .stream()
                 .flatMap(fieldDeclaration ->
@@ -131,6 +136,7 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                 .map(variable -> new JavaFieldInfo(
                         variable.getNameAsString(),
                         variable.getTypeAsString()
+
                 ))
                 .toList();
         List<String> annotations =  type.getAnnotations()

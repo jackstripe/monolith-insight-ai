@@ -12,6 +12,11 @@ public record JavaClassInfo(
         List<String> methods,
         String filePath
 ) {
+    public JavaClassInfo {
 
-
+        methods = List.copyOf(methods);
+        annotations = List.copyOf(annotations);
+        constructors = List.copyOf(constructors);
+        fields = List.copyOf(fields);
+    }
 }
