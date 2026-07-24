@@ -50,8 +50,18 @@ public class JavaParserProjectAnalyzerTest {
         assertEquals("com.example.service", classInfo.packageName());
         assertEquals("UserService", classInfo.className());
         assertEquals("CLASS", classInfo.type());
+        JavaMethodInfo createUser = new JavaMethodInfo(
+                        "createUser",
+                        "void",
+                        List.of()
+                );
+        JavaMethodInfo findUser = new JavaMethodInfo(
+                "findUser",
+                "String",
+                List.of()
+        );
         assertEquals(
-                List.of("createUser", "findUser"),
+                List.of(createUser, findUser),
                 classInfo.methods()
         );
 

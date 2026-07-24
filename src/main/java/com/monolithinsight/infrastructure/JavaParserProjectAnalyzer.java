@@ -120,10 +120,9 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
     }
 
     private JavaClassInfo toClassInfo( String packageName, TypeDeclaration<?> type , String relativePath) {
-        List<String> methods = type.getMethods()
-                .stream()
-                .map(NodeWithSimpleName::getNameAsString)
-                .toList();
+
+        List<JavaMethodInfo> methods = extractMethods(type);
+
         List<JavaConstructorInfo> constructors = extractConstructors(type);
 
 
@@ -191,6 +190,25 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
         }
 
         return List.of();
+    }
+
+    private List<JavaMethodInfo> extractMethods(
+            TypeDeclaration<?> type
+    ) {
+        return type.getMethods()
+                .stream()
+                .map(method -> new JavaMethodInfo(
+                        method.getName().asString(),
+                        method.getType().asString(),
+                        method.getParameters()
+                                .stream()
+                                .map(parameter -> new JavaParameterInfo(
+                                        parameter.getTypeAsString(),
+                                        parameter.getNameAsString()
+                                ))
+                                .toList()
+                ))
+                .toList();
     }
 
     private void validateProjectPath(Path projectPath) {

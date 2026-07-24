@@ -2,6 +2,8 @@ package com.monolithinsight.support;
 
 import com.monolithinsight.domain.JavaClassInfo;
 import com.monolithinsight.domain.JavaFieldInfo;
+import com.monolithinsight.domain.JavaMethodInfo;
+
 import java.util.List;
 
 public class TestFixtures {
@@ -44,7 +46,13 @@ public class TestFixtures {
                                 "OrderRepository"
                         )
                 ),
-                List.of("findOrders"),
+                List.of(
+                        new JavaMethodInfo(
+                                "findOrders",
+                                "void",
+                                List.of()
+                        )
+                ),
                 "src/main/java/com/example/orders/OrderService.java"
         );
 }
@@ -61,7 +69,13 @@ public class TestFixtures {
                                 "OrderRepository"
                         )
                 ),
-                List.of("findOrders"),
+                List.of(
+                        new JavaMethodInfo(
+                                "findOrders",
+                                "void",
+                                List.of()
+                        )
+                ),
                 "src/main/java/com/example/orders/InventoryService.java"
         );
     }
@@ -78,7 +92,13 @@ public class TestFixtures {
                                 "String"
                         )
                 ),
-                List.of("findOrdersSample"),
+                List.of(
+                        new JavaMethodInfo(
+                                "findOrdersSample",
+                                "void",
+                                List.of()
+                        )
+                ),
                 "src/main/java/com/example/orders/OrderRepository.java"
         );
     }
@@ -92,9 +112,14 @@ public class TestFixtures {
                 List.of("Service"),
                 List.of(),
                 List.of(),
-                List.of("createUser"),
+                List.of(
+                        new JavaMethodInfo(
+                                "createUser",
+                                "void",
+                                List.of()
+                        )
+                ),
                 "src/main/java/com/example/service/UserService.java"
         );
     }
-
 }

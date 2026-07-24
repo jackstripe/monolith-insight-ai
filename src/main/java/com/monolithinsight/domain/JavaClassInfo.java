@@ -9,7 +9,7 @@ public record JavaClassInfo(
         List<String> annotations,
         List<JavaConstructorInfo> constructors,
         List<JavaFieldInfo> fields,
-        List<String> methods,
+        List<JavaMethodInfo> methods,
         String filePath
 ) {
     public JavaClassInfo {

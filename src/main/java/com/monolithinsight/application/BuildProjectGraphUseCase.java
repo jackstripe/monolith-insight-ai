@@ -41,6 +41,7 @@ public class BuildProjectGraphUseCase {
         for(ClassNode sourceNode : nodes){
             dependencies.addAll(resolveFieldDependencies(sourceNode, simpleNameIndex));
             dependencies.addAll(resolveConstructorDependencies(sourceNode, simpleNameIndex));
+            dependencies.addAll(resolveMethodDependencies(sourceNode, simpleNameIndex));
         }
 
         return new ArrayList<>(dependencies);
@@ -79,14 +80,12 @@ public class BuildProjectGraphUseCase {
         Set<ClassDependency> constructorDependencies = new LinkedHashSet<>();
 
         for (JavaConstructorInfo constructorInfo : sourceNode.classInfo().constructors()) {
-            log.info("Constructor detail: {}", constructorInfo);
             for (JavaParameterInfo parameterInfo : constructorInfo.parameters()){
                 List<ClassNode> candidates =
                         simpleNameIndex.getOrDefault(
                                 parameterInfo.type(),
                                 List.of()
                         );
-                log.info("candidates: {}", candidates);
                 if(candidates.size() == 1){
                     ClassNode targetNode = candidates.getFirst();
                     if (!Objects.equals(sourceNode.id(), targetNode.id())) {
@@ -96,15 +95,40 @@ public class BuildProjectGraphUseCase {
                                         targetNode.id(),
                                         DependencyType.CONSTRUCTOR
                                 );
-
                         constructorDependencies.add(dependency);
                     }
                 }
             }
-
         }
         return constructorDependencies;
 
+    }
+    private Set<ClassDependency> resolveMethodDependencies(ClassNode sourceNode,
+                                                                Map<String, List<ClassNode>> simpleNameIndex) {
+        Set<ClassDependency> methodDependencies = new LinkedHashSet<>();
+        for(JavaMethodInfo methodInfo: sourceNode.classInfo().methods()){
+
+            for(JavaParameterInfo parameterInfo: methodInfo.parameters()){
+                List<ClassNode> candidates =
+                        simpleNameIndex.getOrDefault(
+                                parameterInfo.type(),
+                                List.of()
+                        );
+                if(candidates.size() == 1){
+                    ClassNode targetNode = candidates.getFirst();
+                    if (!Objects.equals(sourceNode.id(), targetNode.id())) {
+                        ClassDependency dependency =
+                                new ClassDependency(
+                                        sourceNode.id(),
+                                        targetNode.id(),
+                                        DependencyType.METHOD
+                                );
+                        methodDependencies.add(dependency);
+                    }
+                }
+            }
+        }
+        return methodDependencies;
     }
 
     private Map<String, List<ClassNode>> buildSimpleNameIndex(
