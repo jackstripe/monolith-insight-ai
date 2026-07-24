@@ -107,9 +107,25 @@ public class BuildProjectGraphUseCase {
                                                                 Map<String, List<ClassNode>> simpleNameIndex) {
         Set<ClassDependency> methodDependencies = new LinkedHashSet<>();
         for(JavaMethodInfo methodInfo: sourceNode.classInfo().methods()){
-
+            List<ClassNode> candidates =
+                    simpleNameIndex.getOrDefault(
+                            methodInfo.returnType(),
+                            List.of()
+                    );
+            if(candidates.size() == 1){
+                ClassNode targetNode = candidates.getFirst();
+                if (!Objects.equals(sourceNode.id(), targetNode.id())) {
+                    ClassDependency dependency =
+                            new ClassDependency(
+                                    sourceNode.id(),
+                                    targetNode.id(),
+                                    DependencyType.RETURN
+                            );
+                    methodDependencies.add(dependency);
+                }
+            }
             for(JavaParameterInfo parameterInfo: methodInfo.parameters()){
-                List<ClassNode> candidates =
+                candidates =
                         simpleNameIndex.getOrDefault(
                                 parameterInfo.type(),
                                 List.of()
