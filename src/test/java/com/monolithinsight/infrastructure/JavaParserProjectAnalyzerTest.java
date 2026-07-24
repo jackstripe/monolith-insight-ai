@@ -349,4 +349,81 @@ public class JavaParserProjectAnalyzerTest {
                 )
         );
     }
+
+    @Test
+    void shouldExtractStructuredClassInformation() throws IOException {
+        Path sourceFile = tempDir.resolve("OrderService.java");
+
+        Files.writeString(sourceFile, """
+            package com.example.orders;
+
+            public class OrderService
+                    extends BaseService
+                    implements Auditable, Searchable {
+
+                public OrderService(OrderRepository repository) {
+                }
+
+                public Order findOrder(OrderRequest request) {
+                    return null;
+                }
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        assertThat(result.classes()).hasSize(1);
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertThat(classInfo.className())
+                .isEqualTo("OrderService");
+
+        assertThat(classInfo.superClass())
+                .contains("BaseService");
+
+        assertThat(classInfo.implementedInterfaces())
+                .containsExactlyInAnyOrder(
+                        "Auditable",
+                        "Searchable"
+                );
+
+        assertThat(classInfo.constructors())
+                .hasSize(1);
+
+        assertThat(classInfo.constructors().getFirst().parameters())
+                .extracting(
+                        JavaParameterInfo::name,
+                        JavaParameterInfo::type
+                )
+                .containsExactly(
+                        tuple(
+                                "repository",
+                                "OrderRepository"
+                        )
+                );
+
+        assertThat(classInfo.methods())
+                .hasSize(1);
+
+        JavaMethodInfo method = classInfo.methods().getFirst();
+
+        assertThat(method.name())
+                .isEqualTo("findOrder");
+
+        assertThat(method.returnType())
+                .isEqualTo("Order");
+
+        assertThat(method.parameters())
+                .extracting(
+                        JavaParameterInfo::name,
+                        JavaParameterInfo::type
+                )
+                .containsExactly(
+                        tuple(
+                                "request",
+                                "OrderRequest"
+                        )
+                );
+    }
 }

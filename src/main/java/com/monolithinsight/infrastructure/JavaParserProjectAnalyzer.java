@@ -1,7 +1,11 @@
 package com.monolithinsight.infrastructure;
 
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
 import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.monolithinsight.application.ProjectAnalyzer;
 import com.monolithinsight.domain.*;
 import com.github.javaparser.StaticJavaParser;
@@ -14,7 +18,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
+
+import static reactor.netty.http.HttpConnectionLiveness.log;
 
 @Slf4j
 @Component
@@ -73,7 +81,7 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
             CompilationUnit compilationUnit = StaticJavaParser.parse(javaFile);
             String packageName = compilationUnit
                     .getPackageDeclaration()
-                    .map(declaration -> declaration.getNameAsString())
+                    .map(NodeWithName::getNameAsString)
                     .orElse("");
             List<JavaClassInfo> classes = compilationUnit
                     .getTypes()
@@ -114,7 +122,7 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
             return "RECORD";
         }
         if (type.isClassOrInterfaceDeclaration() && type.asClassOrInterfaceDeclaration().isInterface()) {
-            return "INTERFACE";
+            return "IMPLEMENTS";
         }
         return "CLASS";
     }
@@ -124,7 +132,6 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
         List<JavaMethodInfo> methods = extractMethods(type);
 
         List<JavaConstructorInfo> constructors = extractConstructors(type);
-
 
         List<JavaFieldInfo> fields = type.getFields()
                 .stream()
@@ -144,6 +151,8 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
 
         return new JavaClassInfo( packageName, type.getNameAsString(),
                 determineType(type),
+                extractExtensions(type),
+                extractImplementations(type),
                 annotations,
                 constructors,
                 fields,
@@ -209,6 +218,40 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                                 .toList()
                 ))
                 .toList();
+    }
+
+    private Optional<String> extractExtensions(
+            TypeDeclaration<?> type
+    ) {
+
+        Optional<String> superClass =
+                type.asClassOrInterfaceDeclaration().getExtendedTypes()
+                        .stream()
+                        .findFirst()
+                        .map(ClassOrInterfaceType::getNameAsString);
+
+        NodeList<ClassOrInterfaceType> extendedTypes = type.asClassOrInterfaceDeclaration().getExtendedTypes();
+
+        log.debug("getting extended types for {}: {}", type.getName().asString(), superClass);
+        return superClass;
+
+
+
+    }
+    private List<String> extractImplementations(
+            TypeDeclaration<?> type
+    ){
+        if (!type.isClassOrInterfaceDeclaration()) {
+            return List.of();
+        }
+        NodeList<ClassOrInterfaceType> implementedTypes = type.asClassOrInterfaceDeclaration().getImplementedTypes();
+        log.debug("getting implemented types for {}: {}", type.getName().asString(), implementedTypes);
+        return implementedTypes
+                .stream()
+                .map(
+                        impl -> impl.asClassOrInterfaceType().getName().asString())
+                .toList();
+
     }
 
     private void validateProjectPath(Path projectPath) {

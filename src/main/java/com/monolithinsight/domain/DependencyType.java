@@ -3,6 +3,8 @@ package com.monolithinsight.domain;
 public enum DependencyType {
     FIELD,
     CONSTRUCTOR,
-    METHOD,
-    RETURN
+    METHOD_PARAMETER,
+    RETURN_TYPE,
+    INHERITANCE,
+    IMPLEMENTS
 }

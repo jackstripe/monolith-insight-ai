@@ -42,6 +42,13 @@ public class BuildProjectGraphUseCase {
             dependencies.addAll(resolveFieldDependencies(sourceNode, simpleNameIndex));
             dependencies.addAll(resolveConstructorDependencies(sourceNode, simpleNameIndex));
             dependencies.addAll(resolveMethodDependencies(sourceNode, simpleNameIndex));
+            dependencies.addAll(resolveReturnDependencies(sourceNode,simpleNameIndex));
+            if(sourceNode.classInfo().superClass().isPresent()) {
+                dependencies.addAll(resolveInheritanceDependency(sourceNode, simpleNameIndex));
+            }
+            if(!sourceNode.classInfo().implementedInterfaces().isEmpty()){
+                dependencies.addAll(resolveImplementationsDependency(sourceNode, simpleNameIndex));
+            }
         }
 
         return new ArrayList<>(dependencies);
@@ -51,25 +58,13 @@ public class BuildProjectGraphUseCase {
                                                           Map<String, List<ClassNode>> simpleNameIndex){
         Set<ClassDependency> fieldDependencies = new LinkedHashSet<>();
         for (JavaFieldInfo field : sourceNode.classInfo().fields()) {
-
-            List<ClassNode> candidates =
-                    simpleNameIndex.getOrDefault(
+            fieldDependencies.addAll(
+                    findCandidatesAndResolveDependency(
+                            sourceNode,
                             field.type(),
-                            List.of()
-                    );
-            if (candidates.size() == 1) {
-                ClassNode targetNode = candidates.getFirst();
-                if (!Objects.equals(sourceNode.id(), targetNode.id())) {
-                    ClassDependency dependency =
-                            new ClassDependency(
-                                    sourceNode.id(),
-                                    targetNode.id(),
-                                    DependencyType.FIELD
-                            );
-
-                    fieldDependencies.add(dependency);
-                }
-            }
+                            DependencyType.FIELD,
+                            simpleNameIndex
+                    ));
         }
         return fieldDependencies;
     }
@@ -81,23 +76,11 @@ public class BuildProjectGraphUseCase {
 
         for (JavaConstructorInfo constructorInfo : sourceNode.classInfo().constructors()) {
             for (JavaParameterInfo parameterInfo : constructorInfo.parameters()){
-                List<ClassNode> candidates =
-                        simpleNameIndex.getOrDefault(
+                constructorDependencies.addAll(
+                        findCandidatesAndResolveDependency(sourceNode,
                                 parameterInfo.type(),
-                                List.of()
-                        );
-                if(candidates.size() == 1){
-                    ClassNode targetNode = candidates.getFirst();
-                    if (!Objects.equals(sourceNode.id(), targetNode.id())) {
-                        ClassDependency dependency =
-                                new ClassDependency(
-                                        sourceNode.id(),
-                                        targetNode.id(),
-                                        DependencyType.CONSTRUCTOR
-                                );
-                        constructorDependencies.add(dependency);
-                    }
-                }
+                                DependencyType.CONSTRUCTOR,
+                                simpleNameIndex));
             }
         }
         return constructorDependencies;
@@ -106,45 +89,61 @@ public class BuildProjectGraphUseCase {
     private Set<ClassDependency> resolveMethodDependencies(ClassNode sourceNode,
                                                                 Map<String, List<ClassNode>> simpleNameIndex) {
         Set<ClassDependency> methodDependencies = new LinkedHashSet<>();
+
         for(JavaMethodInfo methodInfo: sourceNode.classInfo().methods()){
-            List<ClassNode> candidates =
-                    simpleNameIndex.getOrDefault(
-                            methodInfo.returnType(),
-                            List.of()
-                    );
-            if(candidates.size() == 1){
-                ClassNode targetNode = candidates.getFirst();
-                if (!Objects.equals(sourceNode.id(), targetNode.id())) {
-                    ClassDependency dependency =
-                            new ClassDependency(
-                                    sourceNode.id(),
-                                    targetNode.id(),
-                                    DependencyType.RETURN
-                            );
-                    methodDependencies.add(dependency);
-                }
-            }
             for(JavaParameterInfo parameterInfo: methodInfo.parameters()){
-                candidates =
-                        simpleNameIndex.getOrDefault(
+                methodDependencies.addAll(
+                        findCandidatesAndResolveDependency(sourceNode,
                                 parameterInfo.type(),
-                                List.of()
-                        );
-                if(candidates.size() == 1){
-                    ClassNode targetNode = candidates.getFirst();
-                    if (!Objects.equals(sourceNode.id(), targetNode.id())) {
-                        ClassDependency dependency =
-                                new ClassDependency(
-                                        sourceNode.id(),
-                                        targetNode.id(),
-                                        DependencyType.METHOD
-                                );
-                        methodDependencies.add(dependency);
-                    }
-                }
+                                DependencyType.METHOD_PARAMETER,
+                                simpleNameIndex));
             }
         }
         return methodDependencies;
+    }
+
+    private Set<ClassDependency> resolveReturnDependencies(ClassNode sourceNode,
+                                                           Map<String, List<ClassNode>> simpleNameIndex) {
+        Set<ClassDependency> returnDependencies = new LinkedHashSet<>();
+
+        for(JavaMethodInfo methodInfo: sourceNode.classInfo().methods()){
+
+            returnDependencies.addAll(
+                    findCandidatesAndResolveDependency(sourceNode,
+                            methodInfo.returnType(),
+                            DependencyType.RETURN_TYPE,
+                            simpleNameIndex));
+        }
+        return returnDependencies;
+    }
+
+    private Set<ClassDependency> resolveInheritanceDependency(ClassNode sourceNode,
+                                                         Map<String, List<ClassNode>> simpleNameIndex){
+
+        Set<ClassDependency> inheritanceDependencies = new LinkedHashSet<>();
+        sourceNode.classInfo()
+                .superClass().ifPresent(
+                superClassName -> {
+                    inheritanceDependencies.addAll(
+                            findCandidatesAndResolveDependency(
+                                    sourceNode,
+                                    superClassName,
+                                    DependencyType.INHERITANCE,
+                                    simpleNameIndex
+                            ));
+                });
+        return inheritanceDependencies;
+    }
+
+    private Set<ClassDependency> resolveImplementationsDependency(ClassNode sourceNode,
+                                                              Map<String, List<ClassNode>> simpleNameIndex) {
+
+        Set<ClassDependency> implementationsDependencies = new LinkedHashSet<>();
+        for (String implementation : sourceNode.classInfo().implementedInterfaces()) {
+            implementationsDependencies.addAll(findCandidatesAndResolveDependency(sourceNode,implementation,DependencyType.IMPLEMENTS,simpleNameIndex));
+        }
+
+        return implementationsDependencies;
     }
 
     private Map<String, List<ClassNode>> buildSimpleNameIndex(
@@ -154,5 +153,28 @@ public class BuildProjectGraphUseCase {
                 .collect(Collectors.groupingBy(
                         node -> node.classInfo().className()
                 ));
+    }
+
+    private Set<ClassDependency> findCandidatesAndResolveDependency(ClassNode sourceNode, String referencedType,
+                                              DependencyType dependencyType, Map<String, List<ClassNode>> simpleNameIndex ){
+        Set<ClassDependency> dependencies = new LinkedHashSet<>();
+        List<ClassNode> candidates =
+                simpleNameIndex.getOrDefault(
+                        referencedType,
+                        List.of()
+                );
+        if(candidates.size() == 1){
+            ClassNode targetNode = candidates.getFirst();
+            if (!Objects.equals(sourceNode.id(), targetNode.id())) {
+                ClassDependency dependency =
+                        new ClassDependency(
+                                sourceNode.id(),
+                                targetNode.id(),
+                                dependencyType
+                        );
+                dependencies.add(dependency);
+            }
+        }
+        return dependencies;
     }
 }

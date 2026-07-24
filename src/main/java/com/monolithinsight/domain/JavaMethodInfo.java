@@ -7,4 +7,7 @@ public record JavaMethodInfo(
         String returnType,
         List<JavaParameterInfo> parameters
 ) {
+    public JavaMethodInfo {
+        parameters = List.copyOf(parameters);
+    }
 }

@@ -5,6 +5,7 @@ import com.monolithinsight.domain.JavaFieldInfo;
 import com.monolithinsight.domain.JavaMethodInfo;
 
 import java.util.List;
+import java.util.Optional;
 
 public class TestFixtures {
 
@@ -17,6 +18,8 @@ public class TestFixtures {
                 packageName,
                 className,
                 "CLASS",
+                Optional.empty(),
+                List.of(),
                 List.of(),
                 List.of(),
                 List.of(),
@@ -34,6 +37,8 @@ public class TestFixtures {
                 "com.example.orders",
                 "OrderService",
                 "CLASS",
+                Optional.empty(),
+                List.of(),
                 List.of("Service"),
                 List.of(),
                 List.of(
@@ -61,6 +66,8 @@ public class TestFixtures {
         return new JavaClassInfo("com.example.orders",
                 "InventoryService",
                 "CLASS",
+                Optional.empty(),
+                List.of(),
                 List.of("Service"),
                 List.of(),
                 List.of(
@@ -84,6 +91,8 @@ public class TestFixtures {
                 "com.example.orders",
                 "OrderRepository",
                 "CLASS",
+                Optional.empty(),
+                List.of(),
                 List.of("Repository"),
                 List.of(),
                 List.of(
@@ -109,6 +118,8 @@ public class TestFixtures {
                 "com.example",
                 "UserService",
                 "CLASS",
+                Optional.empty(),
+                List.of(),
                 List.of("Service"),
                 List.of(),
                 List.of(),
