@@ -1,10 +1,9 @@
 package com.monolithinsight.infrastructure;
 
+import com.github.javaparser.ast.nodeTypes.NodeWithName;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.monolithinsight.application.ProjectAnalyzer;
-import com.monolithinsight.domain.AnalysisError;
-import com.monolithinsight.domain.JavaClassInfo;
-import com.monolithinsight.domain.JavaFieldInfo;
-import com.monolithinsight.domain.ProjectAnalysis;
+import com.monolithinsight.domain.*;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.TypeDeclaration;
@@ -123,9 +122,9 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
     private JavaClassInfo toClassInfo( String packageName, TypeDeclaration<?> type , String relativePath) {
         List<String> methods = type.getMethods()
                 .stream()
-                .map(method -> method.getNameAsString())
+                .map(NodeWithSimpleName::getNameAsString)
                 .toList();
-        List<String> constructors = extractConstructors(type);
+        List<JavaConstructorInfo> constructors = extractConstructors(type);
 
 
         List<JavaFieldInfo> fields = type.getFields()
@@ -141,7 +140,7 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                 .toList();
         List<String> annotations =  type.getAnnotations()
                 .stream()
-                .map(annotation ->annotation.getNameAsString())
+                .map(NodeWithName::getNameAsString)
                 .toList();
 
         return new JavaClassInfo( packageName, type.getNameAsString(),
@@ -154,14 +153,24 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
         );
     }
 
-    private List<String> extractConstructors(TypeDeclaration<?> type) {
+    private List<JavaConstructorInfo> extractConstructors(
+            TypeDeclaration<?> type
+    ) {
         if (type.isClassOrInterfaceDeclaration()
                 && !type.asClassOrInterfaceDeclaration().isInterface()) {
 
             return type.asClassOrInterfaceDeclaration()
                     .getConstructors()
                     .stream()
-                    .map(constructor -> constructor.getDeclarationAsString())
+                    .map(constructor -> new JavaConstructorInfo(
+                            constructor.getParameters()
+                                    .stream()
+                                    .map(parameter -> new JavaParameterInfo(
+                                            parameter.getTypeAsString(),
+                                            parameter.getNameAsString()
+                                    ))
+                                    .toList()
+                    ))
                     .toList();
         }
 
@@ -169,7 +178,15 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
             return type.asEnumDeclaration()
                     .getConstructors()
                     .stream()
-                    .map(constructor -> constructor.getDeclarationAsString())
+                    .map(constructor -> new JavaConstructorInfo(
+                            constructor.getParameters()
+                                    .stream()
+                                    .map(parameter -> new JavaParameterInfo(
+                                            parameter.getNameAsString(),
+                                            parameter.getTypeAsString()
+                                    ))
+                                    .toList()
+                    ))
                     .toList();
         }
 

@@ -7,7 +7,7 @@ public record JavaClassInfo(
         String className,
         String type,
         List<String> annotations,
-        List<String> constructors,
+        List<JavaConstructorInfo> constructors,
         List<JavaFieldInfo> fields,
         List<String> methods,
         String filePath

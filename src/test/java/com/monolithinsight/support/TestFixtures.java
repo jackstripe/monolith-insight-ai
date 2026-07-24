@@ -90,7 +90,7 @@ public class TestFixtures {
                 "UserService",
                 "CLASS",
                 List.of("Service"),
-                List.of(""),
+                List.of(),
                 List.of(),
                 List.of("createUser"),
                 "src/main/java/com/example/service/UserService.java"

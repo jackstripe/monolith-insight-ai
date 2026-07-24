@@ -1,9 +1,7 @@
 package com.monolithinsight.infrastructure;
 
-import com.monolithinsight.domain.AnalysisError;
-import com.monolithinsight.domain.JavaClassInfo;
-import com.monolithinsight.domain.JavaFieldInfo;
-import com.monolithinsight.domain.ProjectAnalysis;
+import com.monolithinsight.domain.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -14,7 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public class JavaParserProjectAnalyzerTest {
 
@@ -176,18 +175,28 @@ public class JavaParserProjectAnalyzerTest {
 
         JavaClassInfo classInfo = result.classes().getFirst();
 
-        assertEquals(2, classInfo.constructors().size());
-        assertTrue(
-                classInfo.constructors()
-                        .contains("public OrderService()")
-        );
-        assertTrue(
-                classInfo.constructors()
-                        .contains(
-                                "public OrderService(String name, int retryCount)"
-                        )
-        );
+        assertThat(classInfo.constructors())
+                .hasSize(2);
+
+        assertThat(classInfo.constructors())
+                .anySatisfy(constructor ->
+                        assertThat(constructor.parameters()).isEmpty()
+                );
+
+        assertThat(classInfo.constructors())
+                .anySatisfy(constructor ->
+                        assertThat(constructor.parameters())
+                                .extracting(
+                                        JavaParameterInfo::name,
+                                        JavaParameterInfo::type
+                                )
+                                .containsExactly(
+                                        tuple("name", "String"),
+                                        tuple("retryCount", "int")
+                                )
+                );
     }
+
     @Test
     void shouldExtractFieldsAndTheirTypes() throws IOException {
         Path sourceFile = tempDir.resolve("OrderService.java");
