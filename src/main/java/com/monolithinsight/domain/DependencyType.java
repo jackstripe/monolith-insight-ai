@@ -1,5 +1,10 @@
 package com.monolithinsight.domain;
 
 public enum DependencyType {
-    FIELD
+    FIELD,
+    CONSTRUCTOR,
+    METHOD_PARAMETER,
+    RETURN_TYPE,
+    INHERITANCE,
+    IMPLEMENTS
 }

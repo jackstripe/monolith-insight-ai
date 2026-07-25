@@ -1,10 +1,10 @@
 package com.monolithinsight.infrastructure;
 
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.nodeTypes.NodeWithName;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.monolithinsight.application.ProjectAnalyzer;
-import com.monolithinsight.domain.AnalysisError;
-import com.monolithinsight.domain.JavaClassInfo;
-import com.monolithinsight.domain.JavaFieldInfo;
-import com.monolithinsight.domain.ProjectAnalysis;
+import com.monolithinsight.domain.*;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.TypeDeclaration;
@@ -15,6 +15,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.IOException;
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -74,7 +76,7 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
             CompilationUnit compilationUnit = StaticJavaParser.parse(javaFile);
             String packageName = compilationUnit
                     .getPackageDeclaration()
-                    .map(declaration -> declaration.getNameAsString())
+                    .map(NodeWithName::getNameAsString)
                     .orElse("");
             List<JavaClassInfo> classes = compilationUnit
                     .getTypes()
@@ -121,12 +123,10 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
     }
 
     private JavaClassInfo toClassInfo( String packageName, TypeDeclaration<?> type , String relativePath) {
-        List<String> methods = type.getMethods()
-                .stream()
-                .map(method -> method.getNameAsString())
-                .toList();
-        List<String> constructors = extractConstructors(type);
 
+        List<JavaMethodInfo> methods = extractMethods(type);
+
+        List<JavaConstructorInfo> constructors = extractConstructors(type);
 
         List<JavaFieldInfo> fields = type.getFields()
                 .stream()
@@ -141,11 +141,13 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                 .toList();
         List<String> annotations =  type.getAnnotations()
                 .stream()
-                .map(annotation ->annotation.getNameAsString())
+                .map(NodeWithName::getNameAsString)
                 .toList();
 
         return new JavaClassInfo( packageName, type.getNameAsString(),
                 determineType(type),
+                extractExtensions(type),
+                extractImplementations(type),
                 annotations,
                 constructors,
                 fields,
@@ -154,14 +156,24 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
         );
     }
 
-    private List<String> extractConstructors(TypeDeclaration<?> type) {
+    private List<JavaConstructorInfo> extractConstructors(
+            TypeDeclaration<?> type
+    ) {
         if (type.isClassOrInterfaceDeclaration()
                 && !type.asClassOrInterfaceDeclaration().isInterface()) {
 
             return type.asClassOrInterfaceDeclaration()
                     .getConstructors()
                     .stream()
-                    .map(constructor -> constructor.getDeclarationAsString())
+                    .map(constructor -> new JavaConstructorInfo(
+                            constructor.getParameters()
+                                    .stream()
+                                    .map(parameter -> new JavaParameterInfo(
+                                            parameter.getTypeAsString(),
+                                            parameter.getNameAsString()
+                                    ))
+                                    .toList()
+                    ))
                     .toList();
         }
 
@@ -169,11 +181,72 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
             return type.asEnumDeclaration()
                     .getConstructors()
                     .stream()
-                    .map(constructor -> constructor.getDeclarationAsString())
+                    .map(constructor -> new JavaConstructorInfo(
+                            constructor.getParameters()
+                                    .stream()
+                                    .map(parameter -> new JavaParameterInfo(
+                                            parameter.getTypeAsString(),
+                                            parameter.getNameAsString()
+                                    ))
+                                    .toList()
+                    ))
                     .toList();
         }
 
         return List.of();
+    }
+
+    private List<JavaMethodInfo> extractMethods(
+            TypeDeclaration<?> type
+    ) {
+        return type.getMethods()
+                .stream()
+                .map(method -> new JavaMethodInfo(
+                        method.getName().asString(),
+                        method.getType().asString(),
+                        method.getParameters()
+                                .stream()
+                                .map(parameter -> new JavaParameterInfo(
+                                        parameter.getTypeAsString(),
+                                        parameter.getNameAsString()
+                                ))
+                                .toList()
+                ))
+                .toList();
+    }
+
+    private Optional<String> extractExtensions(
+            TypeDeclaration<?> type
+    ) {
+        if (!type.isClassOrInterfaceDeclaration()) {
+            return Optional.empty();
+        }
+        Optional<String> superClass =
+                type.asClassOrInterfaceDeclaration().getExtendedTypes()
+                        .stream()
+                        .findFirst()
+                        .map(ClassOrInterfaceType::getNameAsString);
+
+        log.debug("getting extended types for {}: {}", type.getName().asString(), superClass);
+        return superClass;
+
+
+
+    }
+    private List<String> extractImplementations(
+            TypeDeclaration<?> type
+    ){
+        if (!type.isClassOrInterfaceDeclaration()) {
+            return List.of();
+        }
+        NodeList<ClassOrInterfaceType> implementedTypes = type.asClassOrInterfaceDeclaration().getImplementedTypes();
+        log.debug("getting implemented types for {}: {}", type.getName().asString(), implementedTypes);
+        return implementedTypes
+                .stream()
+                .map(
+                        impl -> impl.asClassOrInterfaceType().getName().asString())
+                .toList();
+
     }
 
     private void validateProjectPath(Path projectPath) {
@@ -191,4 +264,5 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                 || normalizedPath.contains("/build/")
                 || normalizedPath.contains("/.git/");
     }
+
 }

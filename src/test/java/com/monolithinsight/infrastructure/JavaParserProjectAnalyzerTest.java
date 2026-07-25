@@ -1,9 +1,7 @@
 package com.monolithinsight.infrastructure;
 
-import com.monolithinsight.domain.AnalysisError;
-import com.monolithinsight.domain.JavaClassInfo;
-import com.monolithinsight.domain.JavaFieldInfo;
-import com.monolithinsight.domain.ProjectAnalysis;
+import com.monolithinsight.domain.*;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -14,7 +12,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 public class JavaParserProjectAnalyzerTest {
 
@@ -51,8 +50,18 @@ public class JavaParserProjectAnalyzerTest {
         assertEquals("com.example.service", classInfo.packageName());
         assertEquals("UserService", classInfo.className());
         assertEquals("CLASS", classInfo.type());
+        JavaMethodInfo createUser = new JavaMethodInfo(
+                        "createUser",
+                        "void",
+                        List.of()
+                );
+        JavaMethodInfo findUser = new JavaMethodInfo(
+                "findUser",
+                "String",
+                List.of()
+        );
         assertEquals(
-                List.of("createUser", "findUser"),
+                List.of(createUser, findUser),
                 classInfo.methods()
         );
 
@@ -176,18 +185,28 @@ public class JavaParserProjectAnalyzerTest {
 
         JavaClassInfo classInfo = result.classes().getFirst();
 
-        assertEquals(2, classInfo.constructors().size());
-        assertTrue(
-                classInfo.constructors()
-                        .contains("public OrderService()")
-        );
-        assertTrue(
-                classInfo.constructors()
-                        .contains(
-                                "public OrderService(String name, int retryCount)"
-                        )
-        );
+        assertThat(classInfo.constructors())
+                .hasSize(2);
+
+        assertThat(classInfo.constructors())
+                .anySatisfy(constructor ->
+                        assertThat(constructor.parameters()).isEmpty()
+                );
+
+        assertThat(classInfo.constructors())
+                .anySatisfy(constructor ->
+                        assertThat(constructor.parameters())
+                                .extracting(
+                                        JavaParameterInfo::name,
+                                        JavaParameterInfo::type
+                                )
+                                .containsExactly(
+                                        tuple("name", "String"),
+                                        tuple("retryCount", "int")
+                                )
+                );
     }
+
     @Test
     void shouldExtractFieldsAndTheirTypes() throws IOException {
         Path sourceFile = tempDir.resolve("OrderService.java");
@@ -329,5 +348,211 @@ public class JavaParserProjectAnalyzerTest {
                 )
                 )
         );
+    }
+
+    @Test
+    void shouldExtractStructuredClassInformation() throws IOException {
+        Path sourceFile = tempDir.resolve("OrderService.java");
+
+        Files.writeString(sourceFile, """
+            package com.example.orders;
+
+            public class OrderService
+                    extends BaseService
+                    implements Auditable, Searchable {
+
+                public OrderService(OrderRepository repository) {
+                }
+
+                public Order findOrder(OrderRequest request) {
+                    return null;
+                }
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        assertThat(result.classes()).hasSize(1);
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertThat(classInfo.className())
+                .isEqualTo("OrderService");
+
+        assertThat(classInfo.superClass())
+                .contains("BaseService");
+
+        assertThat(classInfo.implementedInterfaces())
+                .containsExactlyInAnyOrder(
+                        "Auditable",
+                        "Searchable"
+                );
+
+        assertThat(classInfo.constructors())
+                .hasSize(1);
+
+        assertThat(classInfo.constructors().getFirst().parameters())
+                .extracting(
+                        JavaParameterInfo::name,
+                        JavaParameterInfo::type
+                )
+                .containsExactly(
+                        tuple(
+                                "repository",
+                                "OrderRepository"
+                        )
+                );
+
+        assertThat(classInfo.methods())
+                .hasSize(1);
+
+        JavaMethodInfo method = classInfo.methods().getFirst();
+
+        assertThat(method.name())
+                .isEqualTo("findOrder");
+
+        assertThat(method.returnType())
+                .isEqualTo("Order");
+
+        assertThat(method.parameters())
+                .extracting(
+                        JavaParameterInfo::name,
+                        JavaParameterInfo::type
+                )
+                .containsExactly(
+                        tuple(
+                                "request",
+                                "OrderRequest"
+                        )
+                );
+    }
+
+    @Test
+    void shouldClassifyInterfaceAsInterface() throws IOException {
+        Path sourceFile = tempDir.resolve("Auditable.java");
+
+        Files.writeString(sourceFile, """
+            package com.example.shared;
+
+            public interface Auditable {
+                void audit();
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        assertThat(result.classes()).hasSize(1);
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertThat(classInfo.className())
+                .isEqualTo("Auditable");
+
+        assertThat(classInfo.type())
+                .isEqualTo("INTERFACE");
+
+        assertThat(classInfo.superClass())
+                .isEmpty();
+
+        assertThat(classInfo.implementedInterfaces())
+                .isEmpty();
+    }
+
+    @Test
+    void shouldAnalyzeEnumWithoutTryingToExtractSuperclass() throws IOException {
+        Path sourceFile = tempDir.resolve("OrderStatus.java");
+
+        Files.writeString(sourceFile, """
+            package com.example.orders;
+
+            public enum OrderStatus {
+                CREATED,
+                PAID,
+                CANCELLED
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        assertThat(result.errors()).isEmpty();
+        assertThat(result.classes()).hasSize(1);
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertThat(classInfo.className())
+                .isEqualTo("OrderStatus");
+
+        assertThat(classInfo.type())
+                .isEqualTo("ENUM");
+
+        assertThat(classInfo.superClass())
+                .isEmpty();
+
+        assertThat(classInfo.implementedInterfaces())
+                .isEmpty();
+    }
+
+    @Test
+    void shouldExtractEnumConstructorParameters() throws IOException {
+        Path sourceFile = tempDir.resolve("OrderStatus.java");
+
+        Files.writeString(sourceFile, """
+            package com.example.orders;
+
+            public enum OrderStatus {
+                CREATED("Created"),
+                PAID("Paid");
+
+                private final String label;
+
+                OrderStatus(String label) {
+                    this.label = label;
+                }
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        assertThat(result.errors()).isEmpty();
+        assertThat(result.classes()).hasSize(1);
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertThat(classInfo.constructors())
+                .hasSize(1);
+
+        JavaConstructorInfo constructor =
+                classInfo.constructors().getFirst();
+
+        assertThat(constructor.parameters())
+                .extracting(
+                        JavaParameterInfo::type,
+                        JavaParameterInfo::name
+                )
+                .containsExactly(
+                        tuple("String", "label")
+                );
+    }
+
+    @Test
+    void shouldExtractExtendedTypeFromInterface() throws IOException {
+        Path sourceFile = tempDir.resolve("AdvancedAuditable.java");
+
+        Files.writeString(sourceFile, """
+            package com.example.shared;
+
+            public interface AdvancedAuditable extends Auditable {
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertThat(classInfo.type())
+                .isEqualTo("INTERFACE");
+
+        assertThat(classInfo.superClass())
+                .contains("Auditable");
     }
 }
