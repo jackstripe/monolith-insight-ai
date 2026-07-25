@@ -1,10 +1,7 @@
 package com.monolithinsight.infrastructure;
 
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
-import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.monolithinsight.application.ProjectAnalyzer;
 import com.monolithinsight.domain.*;
@@ -21,8 +18,6 @@ import java.io.IOException;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
-
-import static reactor.netty.http.HttpConnectionLiveness.log;
 
 @Slf4j
 @Component
@@ -122,7 +117,7 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
             return "RECORD";
         }
         if (type.isClassOrInterfaceDeclaration() && type.asClassOrInterfaceDeclaration().isInterface()) {
-            return "IMPLEMENTS";
+            return "INTERFACE";
         }
         return "CLASS";
     }
@@ -190,8 +185,8 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                             constructor.getParameters()
                                     .stream()
                                     .map(parameter -> new JavaParameterInfo(
-                                            parameter.getNameAsString(),
-                                            parameter.getTypeAsString()
+                                            parameter.getTypeAsString(),
+                                            parameter.getNameAsString()
                                     ))
                                     .toList()
                     ))
@@ -223,14 +218,14 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
     private Optional<String> extractExtensions(
             TypeDeclaration<?> type
     ) {
-
+        if (!type.isClassOrInterfaceDeclaration()) {
+            return Optional.empty();
+        }
         Optional<String> superClass =
                 type.asClassOrInterfaceDeclaration().getExtendedTypes()
                         .stream()
                         .findFirst()
                         .map(ClassOrInterfaceType::getNameAsString);
-
-        NodeList<ClassOrInterfaceType> extendedTypes = type.asClassOrInterfaceDeclaration().getExtendedTypes();
 
         log.debug("getting extended types for {}: {}", type.getName().asString(), superClass);
         return superClass;
@@ -269,4 +264,5 @@ public class JavaParserProjectAnalyzer implements ProjectAnalyzer {
                 || normalizedPath.contains("/build/")
                 || normalizedPath.contains("/.git/");
     }
+
 }

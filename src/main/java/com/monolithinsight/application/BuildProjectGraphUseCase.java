@@ -28,7 +28,7 @@ public class BuildProjectGraphUseCase {
                 dependencies.size()
         );
 
-        log.info("Resolved dependencies: {}", dependencies);
+        log.debug("Resolved dependencies: {}", dependencies);
         return new ProjectGraph(nodes, dependencies);
     }
 
@@ -43,12 +43,9 @@ public class BuildProjectGraphUseCase {
             dependencies.addAll(resolveConstructorDependencies(sourceNode, simpleNameIndex));
             dependencies.addAll(resolveMethodDependencies(sourceNode, simpleNameIndex));
             dependencies.addAll(resolveReturnDependencies(sourceNode,simpleNameIndex));
-            if(sourceNode.classInfo().superClass().isPresent()) {
-                dependencies.addAll(resolveInheritanceDependency(sourceNode, simpleNameIndex));
-            }
-            if(!sourceNode.classInfo().implementedInterfaces().isEmpty()){
-                dependencies.addAll(resolveImplementationsDependency(sourceNode, simpleNameIndex));
-            }
+            dependencies.addAll(resolveInheritanceDependency(sourceNode, simpleNameIndex));
+            dependencies.addAll(resolveImplementationsDependency(sourceNode, simpleNameIndex));
+
         }
 
         return new ArrayList<>(dependencies);
@@ -146,6 +143,7 @@ public class BuildProjectGraphUseCase {
         return implementationsDependencies;
     }
 
+
     private Map<String, List<ClassNode>> buildSimpleNameIndex(
             List<ClassNode> nodes
     ) {
@@ -177,4 +175,6 @@ public class BuildProjectGraphUseCase {
         }
         return dependencies;
     }
+
+
 }

@@ -426,4 +426,133 @@ public class JavaParserProjectAnalyzerTest {
                         )
                 );
     }
+
+    @Test
+    void shouldClassifyInterfaceAsInterface() throws IOException {
+        Path sourceFile = tempDir.resolve("Auditable.java");
+
+        Files.writeString(sourceFile, """
+            package com.example.shared;
+
+            public interface Auditable {
+                void audit();
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        assertThat(result.classes()).hasSize(1);
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertThat(classInfo.className())
+                .isEqualTo("Auditable");
+
+        assertThat(classInfo.type())
+                .isEqualTo("INTERFACE");
+
+        assertThat(classInfo.superClass())
+                .isEmpty();
+
+        assertThat(classInfo.implementedInterfaces())
+                .isEmpty();
+    }
+
+    @Test
+    void shouldAnalyzeEnumWithoutTryingToExtractSuperclass() throws IOException {
+        Path sourceFile = tempDir.resolve("OrderStatus.java");
+
+        Files.writeString(sourceFile, """
+            package com.example.orders;
+
+            public enum OrderStatus {
+                CREATED,
+                PAID,
+                CANCELLED
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        assertThat(result.errors()).isEmpty();
+        assertThat(result.classes()).hasSize(1);
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertThat(classInfo.className())
+                .isEqualTo("OrderStatus");
+
+        assertThat(classInfo.type())
+                .isEqualTo("ENUM");
+
+        assertThat(classInfo.superClass())
+                .isEmpty();
+
+        assertThat(classInfo.implementedInterfaces())
+                .isEmpty();
+    }
+
+    @Test
+    void shouldExtractEnumConstructorParameters() throws IOException {
+        Path sourceFile = tempDir.resolve("OrderStatus.java");
+
+        Files.writeString(sourceFile, """
+            package com.example.orders;
+
+            public enum OrderStatus {
+                CREATED("Created"),
+                PAID("Paid");
+
+                private final String label;
+
+                OrderStatus(String label) {
+                    this.label = label;
+                }
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        assertThat(result.errors()).isEmpty();
+        assertThat(result.classes()).hasSize(1);
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertThat(classInfo.constructors())
+                .hasSize(1);
+
+        JavaConstructorInfo constructor =
+                classInfo.constructors().getFirst();
+
+        assertThat(constructor.parameters())
+                .extracting(
+                        JavaParameterInfo::type,
+                        JavaParameterInfo::name
+                )
+                .containsExactly(
+                        tuple("String", "label")
+                );
+    }
+
+    @Test
+    void shouldExtractExtendedTypeFromInterface() throws IOException {
+        Path sourceFile = tempDir.resolve("AdvancedAuditable.java");
+
+        Files.writeString(sourceFile, """
+            package com.example.shared;
+
+            public interface AdvancedAuditable extends Auditable {
+            }
+            """);
+
+        ProjectAnalysis result = analyzer.analyze(tempDir);
+
+        JavaClassInfo classInfo = result.classes().getFirst();
+
+        assertThat(classInfo.type())
+                .isEqualTo("INTERFACE");
+
+        assertThat(classInfo.superClass())
+                .contains("Auditable");
+    }
 }

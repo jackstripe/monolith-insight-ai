@@ -1,6 +1,7 @@
 package com.monolithinsight.domain;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public record JavaClassInfo(
@@ -17,10 +18,11 @@ public record JavaClassInfo(
 ) {
     public JavaClassInfo {
 
+        fields = List.copyOf(fields);
         implementedInterfaces = List.copyOf(implementedInterfaces);
         methods = List.copyOf(methods);
         annotations = List.copyOf(annotations);
         constructors = List.copyOf(constructors);
-        fields = List.copyOf(fields);
+        Objects.requireNonNull(superClass);
     }
 }
