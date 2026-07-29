@@ -1,5 +1,6 @@
 package com.monolithinsight.support;
 
+import com.monolithinsight.domain.ClassNode;
 import com.monolithinsight.domain.JavaClassInfo;
 import com.monolithinsight.domain.JavaFieldInfo;
 import com.monolithinsight.domain.JavaMethodInfo;
@@ -132,5 +133,9 @@ public class TestFixtures {
                 ),
                 "src/main/java/com/example/service/UserService.java"
         );
+    }
+
+    public static ClassNode createNode(String id){
+        return new ClassNode(id,null);
     }
 }
