@@ -14,15 +14,17 @@ MON-004.2.1 — Establish Project Documentation as Source of Truth
 
 ## Current Architecture
 
+```text
 Source Code
-↓
+    ↓
 ProjectAnalysis
-↓
+    ↓
 ProjectGraph
-↓
+    ↓
 GraphMetrics
-↓
+    ↓
 Architecture Insights
+```
 
 ## Implemented Components
 
