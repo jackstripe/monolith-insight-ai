@@ -20,7 +20,6 @@ public class FindMostCoupledClassesUseCase {
                             Comparator.comparingInt(ClassMetrics::totalDependencies)
                                     .reversed()
                                     .thenComparing(ClassMetrics::classId)
-                                    //.reversed()
                     )
                     .limit(limit)
                     .map(classMetrics -> new CoupledClass(
@@ -30,6 +29,5 @@ public class FindMostCoupledClassesUseCase {
                             classMetrics.totalDependencies()
                     )).toList()
             );
-
     }
 }

@@ -1,15 +1,19 @@
-# Monolith Insight AI 
+# Monolith Insight AI
 
-Tool to analyize monolithic Java apps and generate suggestions of modernization
-using Spring AI
+Tool to analyze monolithic Java applications and generate modernization
+recommendations using Spring AI.
 
+## Status
 
-## Status 
+In development.
 
-Development. 
+## First Goal
 
+Analyze a Java application, identify its classes and structural relationships,
+and generate an initial architecture report.
 
-## First goal
+## Project Documentation
 
-Feed a Java Application, identify classes and output a basic report of the structure.
-
+- [Project status](docs/PROJECT_STATUS.md)
+- [Product backlog](docs/BACKLOG.md)
+- [Architecture decisions](docs/decisions/README.md)
