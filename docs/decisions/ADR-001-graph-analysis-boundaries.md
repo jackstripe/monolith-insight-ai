@@ -31,10 +31,14 @@ calculated.
 The processing flow will be:
 
 Source Code
-→ ProjectAnalysis
-→ ProjectGraph
-→ GraphMetrics
-→ Architecture Insights
+↓
+ProjectAnalysis
+↓
+ProjectGraph
+↓
+GraphMetrics
+↓
+Architecture Insights
 
 Classes such as AnalyzeGraphMetricsUseCase and
 FindMostCoupledClassesUseCase will not access JavaParser or source files.
@@ -85,3 +89,9 @@ parsing library and make unit testing more difficult.
 
 Rejected because it would duplicate dependency-counting logic and could
 produce inconsistent results between reports.
+
+```markdown
+- Architectural metrics operate exclusively on `ProjectGraph`.
+- Metrics do not depend on JavaParser or source-code parsing.
+- `classId` ascending is used as the tie-breaker.
+- `CoupledClass` includes incoming, outgoing and total dependencies.
