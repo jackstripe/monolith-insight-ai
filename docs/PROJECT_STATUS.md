@@ -6,11 +6,11 @@ Epic 4 — Architecture Insights
 
 ## Current Story
 
-MON-004.2.1 — Establish Project Documentation as Source of Truth
+MON-004.3 — Least Coupled Classes
 
 ## Last Completed Story
 
-MON-004.2 — Most Coupled Classes
+MON-004.2.1 — Establish Project Documentation as Source of Truth
 
 ## Current Architecture
 
