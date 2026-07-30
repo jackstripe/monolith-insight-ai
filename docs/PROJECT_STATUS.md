@@ -10,7 +10,7 @@ MON-004.3 — Least Coupled Classes
 
 ## Last Completed Story
 
-MON-004.2.1 — Establish Project Documentation as Source of Truth
+MON-004.2.2 — Continuous Integration Pipeline
 
 ## Current Architecture
 
@@ -34,6 +34,7 @@ Architecture Insights
 - CoupledClass
 - CouplingReport
 - FindMostCoupledClassesUseCase
+- GitHub Actions CI workflow
 
 ## Important Decisions
 
