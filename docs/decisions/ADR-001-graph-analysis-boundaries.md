@@ -91,3 +91,7 @@ parsing library and make unit testing more difficult.
 
 Rejected because it would duplicate dependency-counting logic and could
 produce inconsistent results between reports.
+
+- Least-coupled classes are ordered by total dependencies ascending.
+- `classId` ascending is used as the tie-breaker.
+- Classes with zero dependencies are included as isolated classes.

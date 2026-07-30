@@ -12,7 +12,7 @@ public class FindLeastCoupledClassesUseCaseTest {
 
 
     @Test
-    void shouldCalculateLeastCoupledClasses() {
+    void shouldFindLeastCoupledClassesOrderedByTotalAndClassId() {
 
         GraphMetrics metrics = new GraphMetrics(
                 List.of(
@@ -64,7 +64,7 @@ public class FindLeastCoupledClassesUseCaseTest {
     }
 
     @Test
-    void shouldCalculateLeastCoupledClassesLimitGreaterThanSize() {
+    void shouldReturnAllClassesWhenLimitExceedsSize() {
 
         GraphMetrics metrics = new GraphMetrics(
                 List.of(
@@ -91,7 +91,7 @@ public class FindLeastCoupledClassesUseCaseTest {
                 )
         );
 
-        CouplingReport report = new FindLeastCoupledClassesUseCase().execute(metrics,4);
+        CouplingReport report = new FindLeastCoupledClassesUseCase().execute(metrics,5);
 
         assertThat(report.classes())
                 .extracting(
@@ -122,7 +122,7 @@ public class FindLeastCoupledClassesUseCaseTest {
     }
 
     @Test
-    void shouldCalculateLeastCoupledClassesLimitIsZero() {
+    void shouldReturnEmptyReportWhenLimitIsZero() {
 
         GraphMetrics metrics = new GraphMetrics(
                 List.of(
@@ -157,7 +157,7 @@ public class FindLeastCoupledClassesUseCaseTest {
     }
 
     @Test
-    void shouldIdentifyFullyIsolatedClass() {
+    void shouldReturnIsolatedClassFirst() {
 
 
         GraphMetrics metrics = new GraphMetrics(
@@ -185,7 +185,7 @@ public class FindLeastCoupledClassesUseCaseTest {
                 )
         );
 
-        CouplingReport report = new FindLeastCoupledClassesUseCase().execute(metrics,0);
+        CouplingReport report = new FindLeastCoupledClassesUseCase().execute(metrics,1);
 
         assertThat(report.classes())
                 .extracting(

@@ -6,7 +6,7 @@ Epic 4 — Architecture Insights
 
 ## Current Story
 
-MON-004.3 — Least Coupled Classes
+MON-004.4 — Package Metrics
 
 ## Last Completed Story
 
@@ -35,6 +35,7 @@ Architecture Insights
 - CouplingReport
 - FindMostCoupledClassesUseCase
 - GitHub Actions CI workflow
+- FindLeastCoupledClassesUseCase
 
 ## Important Decisions
 
