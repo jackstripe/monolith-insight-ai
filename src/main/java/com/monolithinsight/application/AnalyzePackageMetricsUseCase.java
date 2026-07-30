@@ -26,7 +26,7 @@ public class AnalyzePackageMetricsUseCase {
                                 Collectors.summingInt(node -> 1)
                         ));
 
-        for (ClassDependency dependency : graph.dependencies()){
+        for (ClassDependency dependency : graph.dependencies()) {
             String sourcePackage = packageByClassId.get(dependency.sourceNodeId());
             String targetPackage = packageByClassId.get(dependency.targetNodeId());
 
