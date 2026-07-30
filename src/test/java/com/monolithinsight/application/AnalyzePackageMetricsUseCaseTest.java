@@ -78,9 +78,9 @@ public class AnalyzePackageMetricsUseCaseTest {
                 )
         );
 
-        PackageMetricsReport aCase = new AnalyzePackageMetricsUseCase().execute(graph);
+        PackageMetricsReport report = new AnalyzePackageMetricsUseCase().execute(graph);
 
-        assertThat(aCase.packages())
+        assertThat(report.packages())
                 .extracting(
                         PackageMetrics::packageName,
                         PackageMetrics::classCount,
@@ -89,7 +89,7 @@ public class AnalyzePackageMetricsUseCaseTest {
                         PackageMetrics::totalDependencies,
                         PackageMetrics::averageCoupling
                 )
-                .containsExactlyInAnyOrder(
+                .containsExactly(
                         tuple(
                                 "com.example.inventory",
                                 1,
@@ -127,17 +127,100 @@ public class AnalyzePackageMetricsUseCaseTest {
     }
 
     @Test
-    void shouldIgnoreDependenciesWithinSamePackage(){
+    void shouldIgnoreDependenciesWithinSamePackage() {
+        ClassNode controller = ClassNode.from(
+                TestFixtures.createClass(
+                        "com.example.orders",
+                        "OrderController"
+                )
+        );
 
+        ClassNode service = ClassNode.from(
+                TestFixtures.createClass(
+                        "com.example.orders",
+                        "OrderService"
+                )
+        );
+
+        ProjectGraph graph = new ProjectGraph(
+                List.of(controller, service),
+                List.of(
+                        new ClassDependency(
+                                controller.id(),
+                                service.id(),
+                                DependencyType.FIELD
+                        )
+                )
+        );
+
+        PackageMetricsReport report =
+                new AnalyzePackageMetricsUseCase().execute(graph);
+
+        assertThat(report.packages())
+                .extracting(
+                        PackageMetrics::packageName,
+                        PackageMetrics::classCount,
+                        PackageMetrics::incomingDependencies,
+                        PackageMetrics::outgoingDependencies,
+                        PackageMetrics::totalDependencies,
+                        PackageMetrics::averageCoupling
+                )
+                .containsExactly(
+                        tuple(
+                                "com.example.orders",
+                                2,
+                                0,
+                                0,
+                                0,
+                                0.0
+                        )
+                );
     }
 
     @Test
-    void shouldIncludePackageWithoutExternalDependencies(){
+    void shouldIncludePackageWithoutExternalDependencies() {
+        ClassNode legacyHelper = ClassNode.from(
+                TestFixtures.createClass(
+                        "com.example.legacy",
+                        "LegacyHelper"
+                )
+        );
 
+        ProjectGraph graph = new ProjectGraph(
+                List.of(legacyHelper),
+                List.of()
+        );
+
+        PackageMetricsReport report =
+                new AnalyzePackageMetricsUseCase().execute(graph);
+
+        assertThat(report.packages())
+                .extracting(
+                        PackageMetrics::packageName,
+                        PackageMetrics::classCount,
+                        PackageMetrics::incomingDependencies,
+                        PackageMetrics::outgoingDependencies
+                )
+                .containsExactly(
+                        tuple(
+                                "com.example.legacy",
+                                1,
+                                0,
+                                0
+                        )
+                );
     }
 
     @Test
     void shouldReturnEmptyReportForEmptyGraph(){
+        ProjectGraph graph = new ProjectGraph(
+                List.of(),
+                List.of()
+        );
 
+        PackageMetricsReport report =
+                new AnalyzePackageMetricsUseCase().execute(graph);
+
+        assertThat(report.packages()).isEmpty();
     }
 }

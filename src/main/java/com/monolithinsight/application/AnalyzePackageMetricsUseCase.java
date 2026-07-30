@@ -9,12 +9,8 @@ public class AnalyzePackageMetricsUseCase {
 
     public PackageMetricsReport execute(ProjectGraph graph) {
 
-
         Map<String, Integer> incomingByPackage = new HashMap<>();
         Map<String, Integer> outgoingByPackage = new HashMap<>();
-
-
-
 
         Map<String, String> packageByClassId =
                 graph.nodes().stream()
@@ -30,9 +26,8 @@ public class AnalyzePackageMetricsUseCase {
                                 Collectors.summingInt(node -> 1)
                         ));
 
-        for(ClassDependency dependency : graph.dependencies()){
+        for (ClassDependency dependency : graph.dependencies()){
             String sourcePackage = packageByClassId.get(dependency.sourceNodeId());
-
             String targetPackage = packageByClassId.get(dependency.targetNodeId());
 
             if (sourcePackage.equals(targetPackage)) {
@@ -63,6 +58,5 @@ public class AnalyzePackageMetricsUseCase {
                         .toList();
 
         return new PackageMetricsReport(packages);
-
     }
 }
