@@ -10,7 +10,7 @@ MON-004.4 — Package Metrics
 
 ## Last Completed Story
 
-MON-004.2.2 — Continuous Integration Pipeline
+MON-004.3 — Least Coupled Classes
 
 ## Current Architecture
 
@@ -44,6 +44,10 @@ Architecture Insights
 - Most-coupled classes are ordered by total dependencies descending.
 - classId ascending is used as the tie-breaker.
 - CoupledClass includes incoming, outgoing and total dependencies.
+- Least-coupled classes are ordered by total dependencies ascending.
+- `classId` ascending is used as the tie-breaker.
+- Classes with zero dependencies are included as isolated classes.
+
 
 ## Next Story
 
