@@ -51,16 +51,17 @@ public class AnalyzePackageMetricsUseCase {
             );
         }
 
-        List<PackageMetrics> packages = new ArrayList<>();
+        List<PackageMetrics> packages =
+                classCountByPackage.entrySet().stream()
+                        .sorted(Map.Entry.comparingByKey())
+                        .map(entry -> new PackageMetrics(
+                                entry.getKey(),
+                                entry.getValue(),
+                                incomingByPackage.getOrDefault(entry.getKey(), 0),
+                                outgoingByPackage.getOrDefault(entry.getKey(), 0)
+                        ))
+                        .toList();
 
-        classCountByPackage.forEach((key, value) ->
-                packages.add(new PackageMetrics(
-                    key,
-                    classCountByPackage.getOrDefault(key,0),
-                    incomingByPackage.getOrDefault(key,0),
-                    outgoingByPackage.getOrDefault(key,0))));
-
-        packages.sort(Comparator.comparing(PackageMetrics::packageName));
         return new PackageMetricsReport(packages);
 
     }
