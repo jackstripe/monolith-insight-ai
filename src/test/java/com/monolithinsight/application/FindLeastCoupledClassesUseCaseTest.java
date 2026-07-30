@@ -1,7 +1,6 @@
 package com.monolithinsight.application;
 
 import com.monolithinsight.domain.*;
-import com.monolithinsight.support.TestFixtures;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -13,56 +12,34 @@ public class FindLeastCoupledClassesUseCaseTest {
 
 
     @Test
-    void shouldCalculateMostCoupledClasses() {
-        ClassNode orderService =
-                ClassNode.from(
-                        TestFixtures.createClass(
-                                "com.example",
-                                "OrderService"
-                        )
-                );
+    void shouldCalculateLeastCoupledClasses() {
 
-        ClassNode orderRepository =
-                ClassNode.from(
-                        TestFixtures.createClass(
-                                "com.example",
-                                "OrderRepository"
-                        )
-                );
-
-        ClassNode orderController =
-                ClassNode.from(
-                        TestFixtures.createClass(
-                                "com.example",
-                                "OrderController"
-                        )
-                );
-
-        ProjectGraph graph = new ProjectGraph(
+        GraphMetrics metrics = new GraphMetrics(
                 List.of(
-                        orderService,
-                        orderRepository,
-                        orderController
-                ),
-                List.of(
-                        new ClassDependency(
-                                orderController.id(),
-                                orderService.id(),
-                                DependencyType.FIELD
+                        new ClassMetrics(
+                                "com.example.AuditService",
+                                0,
+                                0
                         ),
-                        new ClassDependency(
-                                orderService.id(),
-                                orderRepository.id(),
-                                DependencyType.CONSTRUCTOR
+                        new ClassMetrics(
+                                "com.example.OrderController",
+                                0,
+                                1
+                        ),
+                        new ClassMetrics(
+                                "com.example.OrderRepository",
+                                1,
+                                0
+                        ),
+                        new ClassMetrics(
+                                "com.example.OrderService",
+                                1,
+                                1
                         )
                 )
         );
 
-        GraphMetrics metrics =
-                new AnalyzeGraphMetricsUseCase()
-                        .execute(graph);
-
-        CouplingReport report = new FindLeastCoupledClassesUseCase().execute(metrics,2);
+        CouplingReport report = new FindLeastCoupledClassesUseCase().execute(metrics,3);
 
         assertThat(report.classes())
                 .extracting(
@@ -72,6 +49,7 @@ public class FindLeastCoupledClassesUseCaseTest {
                         CoupledClass::totalDependencies
                 )
                 .containsExactly(
+                        tuple("com.example.AuditService", 0, 0, 0),
                         tuple("com.example.OrderController",
                                 0,
                                 1,
@@ -86,54 +64,32 @@ public class FindLeastCoupledClassesUseCaseTest {
     }
 
     @Test
-    void shouldCalculateMostCoupledClassesLimitGreaterThanSize() {
-        ClassNode orderService =
-                ClassNode.from(
-                        TestFixtures.createClass(
-                                "com.example",
-                                "OrderService"
-                        )
-                );
+    void shouldCalculateLeastCoupledClassesLimitGreaterThanSize() {
 
-        ClassNode orderRepository =
-                ClassNode.from(
-                        TestFixtures.createClass(
-                                "com.example",
-                                "OrderRepository"
-                        )
-                );
-
-        ClassNode orderController =
-                ClassNode.from(
-                        TestFixtures.createClass(
-                                "com.example",
-                                "OrderController"
-                        )
-                );
-
-        ProjectGraph graph = new ProjectGraph(
+        GraphMetrics metrics = new GraphMetrics(
                 List.of(
-                        orderService,
-                        orderRepository,
-                        orderController
-                ),
-                List.of(
-                        new ClassDependency(
-                                orderController.id(),
-                                orderService.id(),
-                                DependencyType.FIELD
+                        new ClassMetrics(
+                                "com.example.AuditService",
+                                0,
+                                0
                         ),
-                        new ClassDependency(
-                                orderService.id(),
-                                orderRepository.id(),
-                                DependencyType.CONSTRUCTOR
+                        new ClassMetrics(
+                                "com.example.OrderController",
+                                0,
+                                1
+                        ),
+                        new ClassMetrics(
+                                "com.example.OrderRepository",
+                                1,
+                                0
+                        ),
+                        new ClassMetrics(
+                                "com.example.OrderService",
+                                1,
+                                1
                         )
                 )
         );
-
-        GraphMetrics metrics =
-                new AnalyzeGraphMetricsUseCase()
-                        .execute(graph);
 
         CouplingReport report = new FindLeastCoupledClassesUseCase().execute(metrics,4);
 
@@ -145,6 +101,10 @@ public class FindLeastCoupledClassesUseCaseTest {
                         CoupledClass::totalDependencies
                 )
                 .containsExactly(
+                        tuple("com.example.AuditService",
+                                0,
+                                0,
+                                0),
                         tuple("com.example.OrderController",
                                 0,
                                 1,
@@ -162,54 +122,68 @@ public class FindLeastCoupledClassesUseCaseTest {
     }
 
     @Test
-    void shouldCalculateMostCoupledClassesLimitIsZero() {
-        ClassNode orderService =
-                ClassNode.from(
-                        TestFixtures.createClass(
-                                "com.example",
-                                "OrderService"
-                        )
-                );
+    void shouldCalculateLeastCoupledClassesLimitIsZero() {
 
-        ClassNode orderRepository =
-                ClassNode.from(
-                        TestFixtures.createClass(
-                                "com.example",
-                                "OrderRepository"
-                        )
-                );
-
-        ClassNode orderController =
-                ClassNode.from(
-                        TestFixtures.createClass(
-                                "com.example",
-                                "OrderController"
-                        )
-                );
-
-        ProjectGraph graph = new ProjectGraph(
+        GraphMetrics metrics = new GraphMetrics(
                 List.of(
-                        orderService,
-                        orderRepository,
-                        orderController
-                ),
-                List.of(
-                        new ClassDependency(
-                                orderController.id(),
-                                orderService.id(),
-                                DependencyType.FIELD
+
+                        new ClassMetrics(
+                                "com.example.OrderController",
+                                0,
+                                1
                         ),
-                        new ClassDependency(
-                                orderService.id(),
-                                orderRepository.id(),
-                                DependencyType.CONSTRUCTOR
+                        new ClassMetrics(
+                                "com.example.OrderRepository",
+                                1,
+                                0
+                        ),
+                        new ClassMetrics(
+                                "com.example.OrderService",
+                                1,
+                                1
                         )
                 )
         );
 
-        GraphMetrics metrics =
-                new AnalyzeGraphMetricsUseCase()
-                        .execute(graph);
+        CouplingReport report = new FindLeastCoupledClassesUseCase().execute(metrics,0);
+
+        assertThat(report.classes())
+                .extracting(
+                        CoupledClass::classId,
+                        CoupledClass::incomingDependencies,
+                        CoupledClass::outgoingDependencies,
+                        CoupledClass::totalDependencies
+                ).isEmpty();
+    }
+
+    @Test
+    void shouldIdentifyFullyIsolatedClass() {
+
+
+        GraphMetrics metrics = new GraphMetrics(
+                List.of(
+                        new ClassMetrics(
+                                "com.example.AuditService",
+                                0,
+                                0
+                        ),
+                        new ClassMetrics(
+                                "com.example.OrderController",
+                                0,
+                                1
+                        ),
+                        new ClassMetrics(
+                                "com.example.OrderRepository",
+                                1,
+                                0
+                        ),
+                        new ClassMetrics(
+                                "com.example.OrderService",
+                                1,
+                                1
+                        )
+                )
+        );
 
         CouplingReport report = new FindLeastCoupledClassesUseCase().execute(metrics,0);
 

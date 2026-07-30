@@ -46,4 +46,4 @@ Architecture Insights
 
 ## Next Story
 
-MON-004.3 — Least Coupled Classes
+MON-004.4 — Package Metrics
