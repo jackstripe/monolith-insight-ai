@@ -159,7 +159,6 @@ public class FindLeastCoupledClassesUseCaseTest {
     @Test
     void shouldReturnIsolatedClassFirst() {
 
-
         GraphMetrics metrics = new GraphMetrics(
                 List.of(
                         new ClassMetrics(
@@ -193,6 +192,11 @@ public class FindLeastCoupledClassesUseCaseTest {
                         CoupledClass::incomingDependencies,
                         CoupledClass::outgoingDependencies,
                         CoupledClass::totalDependencies
-                ).isEmpty();
+                ).containsExactly(
+                        tuple("com.example.AuditService",
+                                0,
+                                0,
+                                0)
+                );
     }
 }
