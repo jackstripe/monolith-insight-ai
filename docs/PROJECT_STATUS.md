@@ -6,11 +6,11 @@ Epic 4 — Architecture Insights
 
 ## Current Story
 
-MON-004.4 — Package Metrics
+MON-004.5 — Hotspots Report
 
 ## Last Completed Story
 
-MON-004.3 — Least Coupled Classes
+MON-004.4 — Package Metrics
 
 ## Current Architecture
 
@@ -36,6 +36,9 @@ Architecture Insights
 - FindMostCoupledClassesUseCase
 - GitHub Actions CI workflow
 - FindLeastCoupledClassesUseCase
+- PackageMetrics
+- PackageMetricsReport
+- AnalyzePackageMetricsUseCase
 
 ## Important Decisions
 
@@ -47,8 +50,11 @@ Architecture Insights
 - Least-coupled classes are ordered by total dependencies ascending.
 - `classId` ascending is used as the tie-breaker.
 - Classes with zero dependencies are included as isolated classes.
-
+- Package coupling counts only dependencies that cross package boundaries.
+- Dependencies between classes in the same package are excluded.
+- Average package coupling is calculated as external dependencies divided by class count.
+- Package metrics are ordered alphabetically by package name.
 
 ## Next Story
 
-MON-004.4 — Package Metrics
+MON-004.5 — Hotspots Report

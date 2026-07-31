@@ -11,7 +11,6 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class AnalyzeGraphMetricsUseCaseTest {
 
-
     @Test
     void shouldCalculateIncomingAndOutgoingDependenciesForEachClass() {
         ClassNode orderService =

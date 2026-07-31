@@ -7,7 +7,7 @@
 - [x] MON-004.2.1 — Establish Project Documentation as Source of Truth
 - [x] MON-004.2.2 — Continuous Integration Pipeline
 - [x] MON-004.3 — Least Coupled Classes
-- [ ] MON-004.4 — Package Metrics
+- [x] MON-004.4 — Package Metrics
 - [ ] MON-004.5 — Hotspots Report
 
 ## Epic 5 — Graph Traversal
