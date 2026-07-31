@@ -46,7 +46,6 @@ Architecture Insights
 
 ## Important Decisions
 
-- (Outdated) Architectural metrics operate exclusively on ProjectGraph. 
 - Metrics do not depend on JavaParser or source-code parsing.
 - Most-coupled classes are ordered by total dependencies descending.
 - classId ascending is used as the tie-breaker.
