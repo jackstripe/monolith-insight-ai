@@ -10,7 +10,7 @@ MON-004.5 — Hotspots Report
 
 ## Last Completed Story
 
-MON-004.4 — Package Metrics
+MON-004.5 — Hotspots Report
 
 ## Current Architecture
 
@@ -39,6 +39,10 @@ Architecture Insights
 - PackageMetrics
 - PackageMetricsReport
 - AnalyzePackageMetricsUseCase
+- ClassHotspot 
+- CouplingLevel 
+- HotspotsReport 
+- GenerateHotspotsReportUseCase
 
 ## Important Decisions
 
@@ -54,7 +58,8 @@ Architecture Insights
 - Dependencies between classes in the same package are excluded.
 - Average package coupling is calculated as external dependencies divided by class count.
 - Package metrics are ordered alphabetically by package name.
+- LOW/MEDIUM/HIGH thresholds were added to define how much a class is coupled
 
 ## Next Story
 
-MON-004.5 — Hotspots Report
+Technical Sprint Review of Epic 4.

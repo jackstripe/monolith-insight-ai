@@ -8,7 +8,7 @@
 - [x] MON-004.2.2 — Continuous Integration Pipeline
 - [x] MON-004.3 — Least Coupled Classes
 - [x] MON-004.4 — Package Metrics
-- [ ] MON-004.5 — Hotspots Report
+- [X] MON-004.5 — Hotspots Report
 
 ## Epic 5 — Graph Traversal
 
