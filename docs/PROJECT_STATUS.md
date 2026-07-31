@@ -6,7 +6,7 @@ Epic 4 — Architecture Insights
 
 ## Current Story
 
-MON-004.5 — Hotspots Report
+Technical Sprint Review — Epic 4
 
 ## Last Completed Story
 
@@ -46,7 +46,7 @@ Architecture Insights
 
 ## Important Decisions
 
-- Architectural metrics operate exclusively on ProjectGraph.
+- (Outdated) Architectural metrics operate exclusively on ProjectGraph. 
 - Metrics do not depend on JavaParser or source-code parsing.
 - Most-coupled classes are ordered by total dependencies descending.
 - classId ascending is used as the tie-breaker.
@@ -58,8 +58,12 @@ Architecture Insights
 - Dependencies between classes in the same package are excluded.
 - Average package coupling is calculated as external dependencies divided by class count.
 - Package metrics are ordered alphabetically by package name.
-- LOW/MEDIUM/HIGH thresholds were added to define how much a class is coupled
+- Hotspots are ordered by total dependencies descending.
+- `classId` ascending is used as the tie-breaker.
+- Coupling levels are classified as LOW for 0–5 dependencies, MEDIUM for 6–10, and HIGH for 11 or more.
+- Graph metrics are calculated from ProjectGraph.
+- Higher-level class insights operate on GraphMetrics.
 
 ## Next Story
 
-Technical Sprint Review of Epic 4.
+MON-005.1 — Find Reachable Classes
