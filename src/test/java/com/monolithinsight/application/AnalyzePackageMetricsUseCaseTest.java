@@ -1,7 +1,13 @@
 package com.monolithinsight.application;
 
-import com.monolithinsight.domain.*;
+import com.monolithinsight.domain.ClassDependency;
+import com.monolithinsight.domain.ClassNode;
+import com.monolithinsight.domain.DependencyType;
+import com.monolithinsight.domain.ProjectGraph;
+import com.monolithinsight.domain.PackageMetricsReport;
+import com.monolithinsight.domain.PackageMetrics;
 import com.monolithinsight.support.TestFixtures;
+
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -9,10 +15,10 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-public class AnalyzePackageMetricsUseCaseTest {
+class AnalyzePackageMetricsUseCaseTest {
 
     @Test
-    void shouldCalculatePackageMetrics(){
+    void shouldCalculatePackageMetrics() {
         ClassNode orderService =
                 ClassNode.from(
                         TestFixtures.createClass(
@@ -212,7 +218,7 @@ public class AnalyzePackageMetricsUseCaseTest {
     }
 
     @Test
-    void shouldReturnEmptyReportForEmptyGraph(){
+    void shouldReturnEmptyReportForEmptyGraph() {
         ProjectGraph graph = new ProjectGraph(
                 List.of(),
                 List.of()
