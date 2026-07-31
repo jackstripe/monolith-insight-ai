@@ -1,4 +1,6 @@
-package com.monolithinsight.domain;
+package com.monolithinsight.application;
+
+import com.monolithinsight.domain.*;
 
 import java.util.Comparator;
 import java.util.List;
@@ -11,6 +13,7 @@ public class GenerateHotspotsReportUseCase {
                 .stream()
                 .sorted(
                         Comparator.comparingInt(ClassMetrics::totalDependencies)
+                                .reversed()
                         .thenComparing(ClassMetrics::classId)
                 )
                 .map(classMetrics -> new ClassHotspot(
