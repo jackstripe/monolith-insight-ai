@@ -136,7 +136,7 @@ public class TestFixtures {
         return new ClassNode(id,null);
     }
 
-    public static ProjectGraph createGraphTest(){
+    public static ProjectGraph createReachabilityGraph(){
 
         ClassNode orderService =
                 ClassNode.from(

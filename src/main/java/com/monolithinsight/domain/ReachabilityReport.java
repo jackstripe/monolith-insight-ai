@@ -1,6 +1,4 @@
-package com.monolithinsight.application;
-
-import com.monolithinsight.domain.ClassNode;
+package com.monolithinsight.domain;
 
 import java.util.List;
 

@@ -1,10 +1,11 @@
 package com.monolithinsight.application;
 
 import com.monolithinsight.domain.ProjectGraph;
+import com.monolithinsight.domain.ReachabilityReport;
 
 import java.util.List;
 
-public class AnalyzeBFSReachableClasses {
+public class FindReachableClassesUseCase {
 
 
 
