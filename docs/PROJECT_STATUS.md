@@ -2,11 +2,11 @@
 
 ## Current Iteration
 
-Epic 4 — Architecture Insights
+Epic 5 — Graph Traversal
 
 ## Current Story
 
-Technical Sprint Review — Epic 4
+MON-005.1 — Find Reachable Classes
 
 ## Last Completed Story
 
