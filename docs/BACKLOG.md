@@ -12,7 +12,7 @@
 
 ## Epic 5 — Graph Traversal
 
-- [ ] MON-005.1 — Find Reachable Classes
+- [x] MON-005.1 — Find Reachable Classes
 - [ ] MON-005.2 — Impact Analysis
 - [ ] MON-005.3 — Dependency Paths
 - [ ] MON-005.4 — Shortest Dependency Path
