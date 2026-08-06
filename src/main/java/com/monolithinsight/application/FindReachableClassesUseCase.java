@@ -13,7 +13,7 @@ public class FindReachableClassesUseCase {
 
 
 
-    public ReachabilityReport execute(ProjectGraph graph, String classId){
+    public ReachabilityReport execute(ProjectGraph graph, String startClassId){
 
         Map<String, ClassNode> nodesById;
         Map<String, List<String>> adjacencyList;
@@ -25,6 +25,14 @@ public class FindReachableClassesUseCase {
                         ClassNode::id,
                         Function.identity()
                 ));
+
+        if(!nodesById.containsKey(startClassId)){
+            throw new IllegalArgumentException(
+                    "Class not found in graph: " + startClassId
+            );
+        }
+
+
         adjacencyList = graph.dependencies().stream()
                 .collect(Collectors.groupingBy(
                         ClassDependency::sourceNodeId,
@@ -32,38 +40,31 @@ public class FindReachableClassesUseCase {
                         )
                 );
 
-        visited.add(classId);
-        pending.add(classId);
+        if(!adjacencyList.containsKey(startClassId)){
+            return new ReachabilityReport(List.of());
+        }
+
+        visited.add(startClassId);
+        pending.add(startClassId);
 
         while(!pending.isEmpty()){
-            for(String adjacents : pending){
-                List<String> list = adjacencyList.get(adjacents);
-                if(list != null){
-                    for(String adjacent :  adjacencyList.getOrDefault(adjacents,Collections.emptyList())){
-                        pending.remove();
-                        if (visited.add(adjacent)) {
-                            pending.add(adjacent);
-                        }
-                    }
-                }else {
-                    pending.remove();
+            String currentClassId = pending.remove();
+            for (String adjacentClassId : adjacencyList.getOrDefault(  currentClassId, Collections.emptyList())) {
+                if (visited.add(adjacentClassId)) {
+                    pending.add(adjacentClassId);
                 }
-
             }
         }
 
-        visited.remove(classId);
-        ReachabilityReport reachabilityReport =  new ReachabilityReport(nodesById.entrySet().stream()
+        visited.remove(startClassId);
+
+        List<ClassNode> reachableClasses = nodesById.entrySet().stream()
+                .filter(entry -> visited.contains(entry.getKey()))
                 .sorted(Map.Entry.comparingByKey())
-                .filter(
-                        entry -> visited.contains(entry.getKey())
-                )
                 .map(Map.Entry::getValue)
-                .toList());
+                .toList();
 
-
-
-        return reachabilityReport;
+        return new ReachabilityReport(reachableClasses);
 
     }
 }

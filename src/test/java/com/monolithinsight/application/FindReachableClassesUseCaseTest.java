@@ -6,6 +6,7 @@ import com.monolithinsight.domain.ReachabilityReport;
 import com.monolithinsight.support.TestFixtures;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 class FindReachableClassesUseCaseTest {
@@ -32,5 +33,37 @@ class FindReachableClassesUseCaseTest {
                         "com.example.shared.AuditService"
 
                 );
+    }
+
+    @Test
+    void shouldReturnZeroDependenciesReachable() {
+        // Arrange
+
+        ProjectGraph projectGraph = TestFixtures.createReachabilityGraph();
+        String classIdOrigin = "com.example.legacy.LegacyHelper";
+        // Act
+
+        ReachabilityReport reachabilityReport =  new FindReachableClassesUseCase().execute(projectGraph,classIdOrigin);
+        // Assert
+
+        assertThat(reachabilityReport.classes())
+                .extracting(
+                        ClassNode::id)
+                .isEmpty();
+    }
+
+    @Test
+    void shouldReturnNonExistingClass() {
+        // Arrange
+
+        ProjectGraph projectGraph = TestFixtures.createReachabilityGraph();
+        String classIdOrigin = "com.example.legacy.monitor.OutsiderClass";
+        // Act + Assert +
+
+
+        assertThatThrownBy(() ->  new FindReachableClassesUseCase().execute(projectGraph,classIdOrigin))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Class not found in graph: " + classIdOrigin);
+
     }
 }
