@@ -1,9 +1,6 @@
 package com.monolithinsight.support;
 
-import com.monolithinsight.domain.ClassNode;
-import com.monolithinsight.domain.JavaClassInfo;
-import com.monolithinsight.domain.JavaFieldInfo;
-import com.monolithinsight.domain.JavaMethodInfo;
+import com.monolithinsight.domain.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -137,5 +134,232 @@ public class TestFixtures {
 
     public static ClassNode createNode(String id){
         return new ClassNode(id,null);
+    }
+
+    public static ProjectGraph createReachabilityGraph(){
+
+        ClassNode orderService =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.orders",
+                                "OrderService"
+                        )
+                );
+        ClassNode auditService =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.shared",
+                                "AuditService"
+                        )
+                );
+        ClassNode orderController =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.orders",
+                                "OrderController"
+                        )
+                );
+
+        ClassNode inventoryService =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.inventory",
+                                "InventoryService"
+                        )
+                );
+        ClassNode legacyHelper =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.legacy",
+                                "LegacyHelper"
+                        )
+                );
+
+
+        return new ProjectGraph(
+                List.of(
+                        orderController,
+                        orderService,
+                        inventoryService,
+                        auditService,
+                        legacyHelper
+                ),
+                List.of(
+                        new ClassDependency(
+                                orderController.id(),
+                                orderService.id(),
+                                DependencyType.FIELD
+                        ),
+                        new ClassDependency(
+                                orderController.id(),
+                                inventoryService.id(),
+                                DependencyType.FIELD
+                        ),
+                        new ClassDependency(
+                                orderService.id(),
+                                auditService.id(),
+                                DependencyType.FIELD
+                        ),
+                        new ClassDependency(
+                                inventoryService.id(),
+                                auditService.id(),
+                                DependencyType.CONSTRUCTOR
+                        ),
+                        new ClassDependency(
+                                auditService.id(),
+                                legacyHelper.id(),
+                                DependencyType.CONSTRUCTOR
+                        ),
+                        new ClassDependency(
+                                orderService.id(),
+                                legacyHelper.id(),
+                                DependencyType.CONSTRUCTOR
+                        )
+                )
+        );
+    }
+
+    public static ProjectGraph createCycleReachabilityGraph(){
+
+        ClassNode orderService =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.orders",
+                                "OrderService"
+                        )
+                );
+        ClassNode auditService =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.shared",
+                                "AuditService"
+                        )
+                );
+
+        ClassNode legacyHelper =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.legacy",
+                                "LegacyHelper"
+                        )
+                );
+
+
+        return new ProjectGraph(
+                List.of(
+                        orderService,
+                        auditService,
+                        legacyHelper
+                ),
+                List.of(
+
+                        new ClassDependency(
+                                orderService.id(),
+                                auditService.id(),
+                                DependencyType.FIELD
+                        ),
+                        new ClassDependency(
+                                auditService.id(),
+                                legacyHelper.id(),
+                                DependencyType.FIELD
+                        ),
+                        new ClassDependency(
+                                legacyHelper.id(),
+                                orderService.id(),
+                                DependencyType.CONSTRUCTOR
+                        )
+                )
+        );
+    }
+
+    public static ProjectGraph createReachabilityGraphWithOneNonReachable(){
+
+        ClassNode orderService =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.orders",
+                                "OrderService"
+                        )
+                );
+        ClassNode auditService =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.shared",
+                                "AuditService"
+                        )
+                );
+        ClassNode orderController =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.orders",
+                                "OrderController"
+                        )
+                );
+
+        ClassNode inventoryService =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.inventory",
+                                "InventoryService"
+                        )
+                );
+        ClassNode legacyHelper =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.legacy",
+                                "LegacyHelper"
+                        )
+                );
+        ClassNode reportingService =
+                ClassNode.from(
+                        TestFixtures.createClass(
+                                "com.example.reporting",
+                                "ReportingService"
+                        )
+                );
+
+
+        return new ProjectGraph(
+                List.of(
+                        orderController,
+                        orderService,
+                        inventoryService,
+                        auditService,
+                        legacyHelper,
+                        reportingService
+                ),
+                List.of(
+                        new ClassDependency(
+                                orderController.id(),
+                                orderService.id(),
+                                DependencyType.FIELD
+                        ),
+                        new ClassDependency(
+                                orderController.id(),
+                                inventoryService.id(),
+                                DependencyType.FIELD
+                        ),
+                        new ClassDependency(
+                                orderService.id(),
+                                auditService.id(),
+                                DependencyType.FIELD
+                        ),
+                        new ClassDependency(
+                                inventoryService.id(),
+                                auditService.id(),
+                                DependencyType.CONSTRUCTOR
+                        ),
+                        new ClassDependency(
+                                auditService.id(),
+                                legacyHelper.id(),
+                                DependencyType.CONSTRUCTOR
+                        ),
+                        new ClassDependency(
+                                orderService.id(),
+                                legacyHelper.id(),
+                                DependencyType.CONSTRUCTOR
+                        )
+                )
+        );
     }
 }

@@ -6,11 +6,11 @@ Epic 5 — Graph Traversal
 
 ## Current Story
 
-MON-005.1 — Find Reachable Classes
+MON-005.2 — Impact Analysis
 
 ## Last Completed Story
 
-MON-004.5 — Hotspots Report
+MON-005.1 — Find Reachable Classes
 
 ## Current Architecture
 
@@ -43,6 +43,8 @@ Architecture Insights
 - CouplingLevel 
 - HotspotsReport 
 - GenerateHotspotsReportUseCase
+- ReachabilityReport
+- FindReachableClassesUseCase
 
 ## Important Decisions
 
@@ -62,7 +64,12 @@ Architecture Insights
 - Coupling levels are classified as LOW for 0–5 dependencies, MEDIUM for 6–10, and HIGH for 11 or more.
 - Graph metrics are calculated from ProjectGraph.
 - Higher-level class insights operate on GraphMetrics.
+- Reachability follows outgoing class dependencies using breadth-first search.
+- The starting class is excluded from the reachability result.
+- Reachable classes are returned alphabetically by `classId`.
+- Visited-node tracking prevents duplicates and infinite traversal through cycles.
+- An unknown starting class produces an `IllegalArgumentException`.
 
 ## Next Story
 
-MON-005.1 — Find Reachable Classes
+MON-005.2 — Impact Analysis
