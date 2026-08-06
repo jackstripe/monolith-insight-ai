@@ -40,10 +40,6 @@ public class FindReachableClassesUseCase {
                         )
                 );
 
-        if(!adjacencyList.containsKey(startClassId)){
-            return new ReachabilityReport(List.of());
-        }
-
         visited.add(startClassId);
         pending.add(startClassId);
 

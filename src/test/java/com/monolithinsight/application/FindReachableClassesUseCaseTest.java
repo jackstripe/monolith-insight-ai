@@ -36,7 +36,7 @@ class FindReachableClassesUseCaseTest {
     }
 
     @Test
-    void shouldReturnZeroDependenciesReachable() {
+    void shouldReturnEmptyReportForClassWithoutOutgoingDependencies() {
         // Arrange
 
         ProjectGraph projectGraph = TestFixtures.createReachabilityGraph();
@@ -53,7 +53,7 @@ class FindReachableClassesUseCaseTest {
     }
 
     @Test
-    void shouldReturnNonExistingClass() {
+    void shouldRejectUnknownStartingClass() {
         // Arrange
 
         ProjectGraph projectGraph = TestFixtures.createReachabilityGraph();
@@ -65,5 +65,46 @@ class FindReachableClassesUseCaseTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Class not found in graph: " + classIdOrigin);
 
+    }
+
+    @Test
+    void shouldHandleCycleWithoutIncludingStartingClass() {
+        // Arrange
+
+        ProjectGraph projectGraph = TestFixtures.createCycleReachabilityGraph();
+        String classIdOrigin = "com.example.orders.OrderService";
+        // Act
+
+        ReachabilityReport reachabilityReport =  new FindReachableClassesUseCase().execute(projectGraph,classIdOrigin);
+        // Assert
+
+        assertThat(reachabilityReport.classes())
+                .extracting(
+                        ClassNode::id)
+                .containsExactly(
+                        "com.example.legacy.LegacyHelper",
+                        "com.example.shared.AuditService"
+
+                );
+    }
+    @Test
+    void shouldIgnoreDisconnectedClasses(){
+        ProjectGraph projectGraph = TestFixtures.createReachabilityGraphWithOneNonReachable();
+        String classIdOrigin = "com.example.orders.OrderController";
+        // Act
+
+        ReachabilityReport reachabilityReport =  new FindReachableClassesUseCase().execute(projectGraph,classIdOrigin);
+        // Assert
+
+        assertThat(reachabilityReport.classes())
+                .extracting(
+                        ClassNode::id)
+                .containsExactly(
+                        "com.example.inventory.InventoryService",
+                        "com.example.legacy.LegacyHelper",
+                        "com.example.orders.OrderService",
+                        "com.example.shared.AuditService"
+
+                );
     }
 }
