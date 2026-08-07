@@ -8,7 +8,7 @@ import com.monolithinsight.domain.ProjectGraph;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProjectGraphTestBuilder {
+public final class ProjectGraphTestBuilder {
 
     private final List<ClassNode> nodes = new ArrayList<>();
     private final List<ClassDependency> dependencies = new ArrayList<>();
@@ -49,7 +49,11 @@ public class ProjectGraphTestBuilder {
         return this;
     }
 
-    public ProjectGraphTestBuilder addDependency( String sourceId,  String targetId ) {
+    public ProjectGraphTestBuilder addDependency(
+            String sourceId,
+            String targetId
+    ) {
+
         return addDependency(
                 sourceId,
                 targetId,

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class ProjectGraphTestBuilderTest {
+class ProjectGraphTestBuilderTest {
     @Test
     void shouldBuildGraphWithNodesAndDependencies() {
         String source = "com.example.orders.OrderService";

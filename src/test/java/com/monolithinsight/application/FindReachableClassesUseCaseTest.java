@@ -24,14 +24,12 @@ class FindReachableClassesUseCaseTest {
     @Test
     void shouldFindDirectAndTransitiveReachableClasses() {
         // Arrange
-
-        ProjectGraph projectGraph = TestFixtures.createReachabilityGraph();
+        ProjectGraph projectGraph = reachabilityGraph().build();
 
         // Act
-
         ReachabilityReport reachabilityReport =  new FindReachableClassesUseCase().execute(projectGraph, ORDER_CONTROLLER);
-        // Assert
 
+        // Assert
         assertThat(reachabilityReport.classes())
                 .extracting(
                         ClassNode::id)
@@ -46,12 +44,11 @@ class FindReachableClassesUseCaseTest {
 
     @Test
     void shouldReturnEmptyReportForClassWithoutOutgoingDependencies() {
-        // Arrange
 
-        ProjectGraph projectGraph = TestFixtures.createReachabilityGraph();
+        // Arrange
+        ProjectGraph projectGraph = reachabilityGraph().build();
 
         // Act
-
         ReachabilityReport reachabilityReport =  new FindReachableClassesUseCase().execute(projectGraph,LEGACY_HELPER);
         // Assert
 
@@ -63,51 +60,19 @@ class FindReachableClassesUseCaseTest {
 
     @Test
     void shouldRejectUnknownStartingClass() {
-        // Arrange
-
         ProjectGraph graph = ProjectGraphTestBuilder.graph()
-                .addNode(ORDER_CONTROLLER)
                 .addNode(ORDER_SERVICE)
-                .addNode(INVENTORY_SERVICE)
-                .addNode(AUDIT_SERVICE)
-                .addNode(LEGACY_HELPER)
-                .addDependency(
-                        ORDER_CONTROLLER,
-                        ORDER_SERVICE
-                )
-                .addDependency(
-                        ORDER_CONTROLLER,
-                        INVENTORY_SERVICE
-                )
-                .addDependency(
-                        ORDER_SERVICE,
-                        AUDIT_SERVICE
-                )
-                .addDependency(
-                        INVENTORY_SERVICE,
-                        AUDIT_SERVICE,
-                        DependencyType.CONSTRUCTOR
-                )
-                .addDependency(
-                        AUDIT_SERVICE,
-                        LEGACY_HELPER,
-                        DependencyType.CONSTRUCTOR
-                )
-                .addDependency(
-                        ORDER_SERVICE,
-                        LEGACY_HELPER,
-                        DependencyType.CONSTRUCTOR
-                )
                 .build();
 
-
-        // Act + Assert +
-
-
-        assertThatThrownBy(() ->  new FindReachableClassesUseCase().execute(graph, OUTSIDER_CLASS))
+        assertThatThrownBy(() ->
+                new FindReachableClassesUseCase()
+                        .execute(graph, OUTSIDER_CLASS)
+        )
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Class not found in graph: " + OUTSIDER_CLASS);
-
+                .hasMessage(
+                        "Class not found in graph: "
+                                + OUTSIDER_CLASS
+                );
     }
 
     @Test
@@ -146,7 +111,10 @@ class FindReachableClassesUseCaseTest {
 
     @Test
     void shouldIgnoreDisconnectedClasses(){
-        ProjectGraph projectGraph = TestFixtures.createReachabilityGraphWithOneNonReachable();
+
+        ProjectGraph projectGraph = reachabilityGraph()
+                .addNode(OUTSIDER_CLASS)
+                .build();
 
         // Act
 
@@ -162,5 +130,20 @@ class FindReachableClassesUseCaseTest {
                         ORDER_SERVICE,
                         AUDIT_SERVICE
                 );
+    }
+
+    private ProjectGraphTestBuilder reachabilityGraph() {
+        return ProjectGraphTestBuilder.graph()
+                .addNode(ORDER_CONTROLLER)
+                .addNode(ORDER_SERVICE)
+                .addNode(INVENTORY_SERVICE)
+                .addNode(AUDIT_SERVICE)
+                .addNode(LEGACY_HELPER)
+                .addDependency(ORDER_CONTROLLER, ORDER_SERVICE)
+                .addDependency(ORDER_CONTROLLER, INVENTORY_SERVICE)
+                .addDependency(ORDER_SERVICE, AUDIT_SERVICE)
+                .addDependency(INVENTORY_SERVICE, AUDIT_SERVICE)
+                .addDependency(AUDIT_SERVICE, LEGACY_HELPER)
+                .addDependency(ORDER_SERVICE, LEGACY_HELPER);
     }
 }
