@@ -5,7 +5,6 @@ import com.monolithinsight.domain.DependencyType;
 import com.monolithinsight.domain.ProjectGraph;
 import com.monolithinsight.domain.ReachabilityReport;
 import com.monolithinsight.support.ProjectGraphTestBuilder;
-import com.monolithinsight.support.TestFixtures;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -69,9 +68,7 @@ class FindReachableClassesUseCaseTest {
                         .execute(graph, OUTSIDER_CLASS)
         )
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage(
-                        "Class not found in graph: "
-                                + OUTSIDER_CLASS
+                .hasMessage( "Class not found in graph: " + OUTSIDER_CLASS
                 );
     }
 

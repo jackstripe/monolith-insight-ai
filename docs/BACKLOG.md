@@ -13,6 +13,7 @@
 ## Epic 5 — Graph Traversal
 
 - [x] MON-005.1 — Find Reachable Classes
+- [x] TECH-001 — Reusable ProjectGraph Test Builder
 - [ ] MON-005.2 — Impact Analysis
 - [ ] MON-005.3 — Dependency Paths
 - [ ] MON-005.4 — Shortest Dependency Path
