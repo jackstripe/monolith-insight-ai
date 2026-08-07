@@ -219,59 +219,6 @@ public class TestFixtures {
         );
     }
 
-    public static ProjectGraph createCycleReachabilityGraph(){
-
-        ClassNode orderService =
-                ClassNode.from(
-                        TestFixtures.createClass(
-                                "com.example.orders",
-                                "OrderService"
-                        )
-                );
-        ClassNode auditService =
-                ClassNode.from(
-                        TestFixtures.createClass(
-                                "com.example.shared",
-                                "AuditService"
-                        )
-                );
-
-        ClassNode legacyHelper =
-                ClassNode.from(
-                        TestFixtures.createClass(
-                                "com.example.legacy",
-                                "LegacyHelper"
-                        )
-                );
-
-
-        return new ProjectGraph(
-                List.of(
-                        orderService,
-                        auditService,
-                        legacyHelper
-                ),
-                List.of(
-
-                        new ClassDependency(
-                                orderService.id(),
-                                auditService.id(),
-                                DependencyType.FIELD
-                        ),
-                        new ClassDependency(
-                                auditService.id(),
-                                legacyHelper.id(),
-                                DependencyType.FIELD
-                        ),
-                        new ClassDependency(
-                                legacyHelper.id(),
-                                orderService.id(),
-                                DependencyType.CONSTRUCTOR
-                        )
-                )
-        );
-    }
-
     public static ProjectGraph createReachabilityGraphWithOneNonReachable(){
 
         ClassNode orderService =

@@ -1,8 +1,10 @@
 package com.monolithinsight.application;
 
 import com.monolithinsight.domain.ClassNode;
+import com.monolithinsight.domain.DependencyType;
 import com.monolithinsight.domain.ProjectGraph;
 import com.monolithinsight.domain.ReachabilityReport;
+import com.monolithinsight.support.ProjectGraphTestBuilder;
 import com.monolithinsight.support.TestFixtures;
 import org.junit.jupiter.api.Test;
 
@@ -12,25 +14,32 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 class FindReachableClassesUseCaseTest {
 
 
+    private static final String ORDER_CONTROLLER = "com.example.orders.OrderController";
+    private static final String LEGACY_HELPER = "com.example.legacy.LegacyHelper";
+    private static final String INVENTORY_SERVICE = "com.example.inventory.InventoryService";
+    private static final String OUTSIDER_CLASS = "com.example.legacy.monitor.OutsiderClass";
+    private static final String ORDER_SERVICE = "com.example.orders.OrderService";
+    private static final String AUDIT_SERVICE = "com.example.shared.AuditService";
+
     @Test
     void shouldFindDirectAndTransitiveReachableClasses() {
         // Arrange
 
         ProjectGraph projectGraph = TestFixtures.createReachabilityGraph();
-        String classIdOrigin = "com.example.orders.OrderController";
+
         // Act
 
-        ReachabilityReport reachabilityReport =  new FindReachableClassesUseCase().execute(projectGraph,classIdOrigin);
+        ReachabilityReport reachabilityReport =  new FindReachableClassesUseCase().execute(projectGraph, ORDER_CONTROLLER);
         // Assert
 
         assertThat(reachabilityReport.classes())
                 .extracting(
                         ClassNode::id)
                 .containsExactly(
-                        "com.example.inventory.InventoryService",
-                        "com.example.legacy.LegacyHelper",
-                        "com.example.orders.OrderService",
-                        "com.example.shared.AuditService"
+                        INVENTORY_SERVICE,
+                        LEGACY_HELPER,
+                        ORDER_SERVICE,
+                        AUDIT_SERVICE
 
                 );
     }
@@ -40,10 +49,10 @@ class FindReachableClassesUseCaseTest {
         // Arrange
 
         ProjectGraph projectGraph = TestFixtures.createReachabilityGraph();
-        String classIdOrigin = "com.example.legacy.LegacyHelper";
+
         // Act
 
-        ReachabilityReport reachabilityReport =  new FindReachableClassesUseCase().execute(projectGraph,classIdOrigin);
+        ReachabilityReport reachabilityReport =  new FindReachableClassesUseCase().execute(projectGraph,LEGACY_HELPER);
         // Assert
 
         assertThat(reachabilityReport.classes())
@@ -56,55 +65,102 @@ class FindReachableClassesUseCaseTest {
     void shouldRejectUnknownStartingClass() {
         // Arrange
 
-        ProjectGraph projectGraph = TestFixtures.createReachabilityGraph();
-        String classIdOrigin = "com.example.legacy.monitor.OutsiderClass";
+        ProjectGraph graph = ProjectGraphTestBuilder.graph()
+                .addNode(ORDER_CONTROLLER)
+                .addNode(ORDER_SERVICE)
+                .addNode(INVENTORY_SERVICE)
+                .addNode(AUDIT_SERVICE)
+                .addNode(LEGACY_HELPER)
+                .addDependency(
+                        ORDER_CONTROLLER,
+                        ORDER_SERVICE
+                )
+                .addDependency(
+                        ORDER_CONTROLLER,
+                        INVENTORY_SERVICE
+                )
+                .addDependency(
+                        ORDER_SERVICE,
+                        AUDIT_SERVICE
+                )
+                .addDependency(
+                        INVENTORY_SERVICE,
+                        AUDIT_SERVICE,
+                        DependencyType.CONSTRUCTOR
+                )
+                .addDependency(
+                        AUDIT_SERVICE,
+                        LEGACY_HELPER,
+                        DependencyType.CONSTRUCTOR
+                )
+                .addDependency(
+                        ORDER_SERVICE,
+                        LEGACY_HELPER,
+                        DependencyType.CONSTRUCTOR
+                )
+                .build();
+
+
         // Act + Assert +
 
 
-        assertThatThrownBy(() ->  new FindReachableClassesUseCase().execute(projectGraph,classIdOrigin))
+        assertThatThrownBy(() ->  new FindReachableClassesUseCase().execute(graph, OUTSIDER_CLASS))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Class not found in graph: " + classIdOrigin);
+                .hasMessageContaining("Class not found in graph: " + OUTSIDER_CLASS);
 
     }
 
     @Test
     void shouldHandleCycleWithoutIncludingStartingClass() {
-        // Arrange
 
-        ProjectGraph projectGraph = TestFixtures.createCycleReachabilityGraph();
-        String classIdOrigin = "com.example.orders.OrderService";
-        // Act
+        ProjectGraph graph = ProjectGraphTestBuilder.graph()
+                .addNode(ORDER_SERVICE)
+                .addNode(AUDIT_SERVICE)
+                .addNode(LEGACY_HELPER)
+                .addDependency(
+                        ORDER_SERVICE,
+                        AUDIT_SERVICE
+                )
+                .addDependency(
+                        AUDIT_SERVICE,
+                        LEGACY_HELPER
+                )
+                .addDependency(
+                        LEGACY_HELPER,
+                        ORDER_SERVICE,
+                        DependencyType.CONSTRUCTOR
+                )
+                .build();
 
-        ReachabilityReport reachabilityReport =  new FindReachableClassesUseCase().execute(projectGraph,classIdOrigin);
-        // Assert
+        ReachabilityReport report =
+                new FindReachableClassesUseCase()
+                        .execute(graph, ORDER_SERVICE);
 
-        assertThat(reachabilityReport.classes())
-                .extracting(
-                        ClassNode::id)
+        assertThat(report.classes())
+                .extracting(ClassNode::id)
                 .containsExactly(
-                        "com.example.legacy.LegacyHelper",
-                        "com.example.shared.AuditService"
-
+                        LEGACY_HELPER,
+                        AUDIT_SERVICE
                 );
     }
+
     @Test
     void shouldIgnoreDisconnectedClasses(){
         ProjectGraph projectGraph = TestFixtures.createReachabilityGraphWithOneNonReachable();
-        String classIdOrigin = "com.example.orders.OrderController";
+
         // Act
 
-        ReachabilityReport reachabilityReport =  new FindReachableClassesUseCase().execute(projectGraph,classIdOrigin);
+        ReachabilityReport reachabilityReport =  new FindReachableClassesUseCase().execute(projectGraph, ORDER_CONTROLLER);
         // Assert
 
         assertThat(reachabilityReport.classes())
                 .extracting(
                         ClassNode::id)
                 .containsExactly(
-                        "com.example.inventory.InventoryService",
-                        "com.example.legacy.LegacyHelper",
-                        "com.example.orders.OrderService",
-                        "com.example.shared.AuditService"
-
+                        INVENTORY_SERVICE,
+                        LEGACY_HELPER,
+                        ORDER_SERVICE,
+                        AUDIT_SERVICE
                 );
     }
 }
