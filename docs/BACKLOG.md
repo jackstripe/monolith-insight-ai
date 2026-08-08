@@ -19,6 +19,17 @@
 - [ ] MON-005.4 — Shortest Dependency Path
 - [ ] MON-005.5 — Reverse Dependency Analysis
 
+## Technical Epic 1 — Analysis Lifecycle, Persistence & Containers
+
+- [ ] TECH-002 — Define Aggregate Architecture Analysis Report
+- [ ] TECH-003 — Create Analysis Snapshot Repository Port
+- [ ] TECH-004 — Persist Analysis Snapshots with MongoDB
+- [ ] TECH-005 — Orchestrate End-to-End Analysis and Persistence
+- [ ] TECH-006 — Expose Analysis Lifecycle REST Endpoints
+- [ ] TECH-007 — Add MongoDB Integration Tests with Testcontainers
+- [ ] TECH-008 — Containerize the Application
+- [ ] TECH-009 — Run Application and MongoDB with Docker Compose
+
 ## Epic 6 — Graph Analysis
 
 - [ ] Cycle Detection
@@ -26,6 +37,19 @@
 - [ ] Strongly Connected Components
 - [ ] Dependency Layers
 
+## Technical Epic 2 — Remote Analysis, Idempotency & Kubernetes
+
+- [ ] TECH-010 — Define Project Source Abstraction
+- [ ] TECH-011 — Analyze Public GitHub Repositories
+- [ ] TECH-012 — Support Branch, Commit and Subdirectory Selection
+- [ ] TECH-013 — Secure and Limit Remote Source Acquisition
+- [ ] TECH-014 — Calculate Deterministic Project Fingerprints
+- [ ] TECH-015 — Reuse Existing Analysis Snapshots Idempotently
+- [ ] TECH-016 — Introduce Asynchronous Analysis Jobs
+- [ ] TECH-017 — Add Application Health and Readiness Probes
+- [ ] TECH-018 — Deploy the Application Locally with Kubernetes
+- [ ] TECH-019 — Externalize Configuration and Secrets
+- 
 ## Epic 7 — Architectural Intelligence
 
 - [ ] Detect God Classes
