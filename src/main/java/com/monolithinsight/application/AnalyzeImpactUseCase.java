@@ -5,7 +5,7 @@ import com.monolithinsight.domain.ProjectGraph;
 
 import java.util.List;
 
-public class AnalyzeImpactUseCase {
+class AnalyzeImpactUseCase {
 
     public ImpactAnalysisReport execute(
             ProjectGraph graph,

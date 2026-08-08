@@ -39,25 +39,4 @@ class ProjectGraphTestBuilderTest {
                 );
     }
 
-    @Test
-    void example() {
-        String orderService = "com.example.orders.OrderService";
-        String orderController = "com.example.orders.OrderController";
-        String auditService = "com.example.shared.AuditService";
-        String batchingProc = "com.example.shared.BatchProcessing";
-        String legacy = "com.example.shared.LegacyHelper";
-
-        ProjectGraph graph = ProjectGraphTestBuilder.graph()
-                .addNode(orderService)
-                .addNode(orderController)
-                .addNode(auditService)
-                .addNode(batchingProc)
-                .addNode(legacy)
-                .addDependency(orderController,orderService)
-                .addDependency(batchingProc,orderService)
-                .addDependency(orderService,auditService)
-                .addDependency(auditService,legacy)
-                .build();
-
-    }
 }
