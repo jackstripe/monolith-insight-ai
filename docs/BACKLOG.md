@@ -49,7 +49,7 @@
 - [ ] TECH-017 — Add Application Health and Readiness Probes
 - [ ] TECH-018 — Deploy the Application Locally with Kubernetes
 - [ ] TECH-019 — Externalize Configuration and Secrets
-- 
+
 ## Epic 7 — Architectural Intelligence
 
 - [ ] Detect God Classes
@@ -57,6 +57,8 @@
 - [ ] Detect Feature Envy
 - [ ] Detect Highly Coupled Packages
 - [ ] Detect Microservice Candidates
+
+## Technical Epic 3 — GCP Cloud Deployment
 
 ## Epic 8 — AI Integration
 

@@ -34,16 +34,17 @@ application lifecycle, persistence, operability and deployment model.
 3. Complete Epic 6 — Graph Analysis.
 4. Complete Technical Epic 2 — Remote Analysis, Idempotency and Kubernetes.
 5. Continue with Epic 7 — Architectural Intelligence.
-6. Continue with Epic 8 — AI Integration.
+6. Complete Technical Epic 3 — GCP Cloud Deployment.
+7. Continue with Epic 8 — AI Integration.
 
-# Technical Epic 1 — Analysis Lifecycle, Persistence and Containers
+## Technical Epic 1 — Analysis Lifecycle, Persistence and Containers
 
-## Objective
+### Objective
 
 Create a complete analysis lifecycle that coordinates the existing use
 cases, persists their results and exposes them through a REST API.
 
-## Stories
+### Stories
 
 - TECH-002 — Define Aggregate Architecture Analysis Report
 - TECH-003 — Create Analysis Snapshot Repository Port
@@ -54,7 +55,7 @@ cases, persists their results and exposes them through a REST API.
 - TECH-008 — Containerize the Application
 - TECH-009 — Run Application and MongoDB with Docker Compose
 
-## Target Flow
+### Target Flow
 
 ```text
 Analysis request
@@ -70,8 +71,9 @@ Aggregate architecture report
 Persisted analysis snapshot
     ↓
 REST response
+```
 
-Persistence Strategy
+## Persistence Strategy
 
 MongoDB is the initial persistence technology because an architecture
 analysis naturally forms a document containing metadata and nested reports.
@@ -83,31 +85,37 @@ The first implementation will persist every requested analysis as a new
 snapshot. Project fingerprints and snapshot reuse are deferred to Technical
 Epic 2.
 
-Initial API
+### Initial API
+
+```http
 POST /api/analyses
 GET  /api/analyses/{analysisId}
 GET  /api/projects/{projectId}/analyses
 GET  /api/projects/{projectId}/analyses/latest
-Exit Criteria
-A complete architecture analysis can be generated through one use case.
-The analysis is persisted in MongoDB.
-Persisted analyses can be retrieved through REST endpoints.
-Application and MongoDB integration is tested with Testcontainers.
-The application can run as a Docker image.
-Application and MongoDB can run together through Docker Compose.
-Out of Scope
-Project content fingerprints.
-Automatic snapshot reuse.
-Remote GitHub repositories.
-Asynchronous analysis jobs.
-Kubernetes deployment.
-Technical Epic 2 — Remote Analysis, Idempotency and Kubernetes
-Objective
+```
+
+### Exit Criteria
+- A complete architecture analysis can be generated through one use case.
+- The analysis is persisted in MongoDB.
+- Persisted analyses can be retrieved through REST endpoints.
+- Application and MongoDB integration is tested with Testcontainers.
+- The application can run as a Docker image.
+- Application and MongoDB can run together through Docker Compose.
+
+### Out of Scope
+- Project content fingerprints.
+- Automatic snapshot reuse.
+- Remote GitHub repositories.
+- Asynchronous analysis jobs.
+- Kubernetes deployment.
+
+## Technical Epic 2 — Remote Analysis, Idempotency and Kubernetes
+### Objective
 
 Allow the application to safely analyze remote projects, avoid duplicate
 analyses and run in a Kubernetes environment.
 
-Stories
+### Stories
 TECH-010 — Define Project Source Abstraction
 TECH-011 — Analyze Public GitHub Repositories
 TECH-012 — Support Branch, Commit and Subdirectory Selection
@@ -118,69 +126,120 @@ TECH-016 — Introduce Asynchronous Analysis Jobs
 TECH-017 — Add Application Health and Readiness Probes
 TECH-018 — Deploy the Application Locally with Kubernetes
 TECH-019 — Externalize Configuration and Secrets
-Remote Analysis Request
+
+### Remote Analysis Request
+```http
 POST /api/analyses/github
+```
+
+```json
 {
   "repositoryUrl": "https://github.com/owner/project",
   "ref": "main",
   "subdirectory": "backend/order-service"
 }
+```
 
 The first implementation will accept only public GitHub repositories.
 
-Security Constraints
-Accept only approved GitHub URL formats.
-Reject arbitrary hosts.
-Limit repository size and file count.
-Apply download and analysis timeouts.
-Validate requested subdirectories.
-Prevent path traversal.
-Handle symbolic links safely.
-Remove temporary files after analysis.
-Do not execute code from the analyzed repository.
-Fingerprint Strategy
+### Security Constraints
+
+- Accept only approved GitHub URL formats.
+- Reject arbitrary hosts.
+- Limit repository size and file count.
+- Apply download and analysis timeouts.
+- Validate requested subdirectories.
+- Prevent path traversal.
+- Handle symbolic links safely.
+- Remove temporary files after analysis.
+- Do not execute code from the analyzed repository.
+
+### Fingerprint Strategy
+
+```text
 SHA-256(
     ordered relative paths
     + file contents
     + analyzer version
     + analysis configuration
 )
+```
 
 The fingerprint will allow the application to find and reuse an existing
 snapshot when the project and analyzer behavior have not changed.
 
-Kubernetes Scope
+### Kubernetes Scope
 
 The initial Kubernetes deployment will include:
 
-Application Deployment
-Application Service
-ConfigMap
-Secret references
-Readiness probe
-Liveness probe
-CPU and memory limits
-Temporary workspace configuration
+- Application Deployment
+- Application Service
+- ConfigMap
+- Secret references
+- Readiness probe
+- Liveness probe
+- CPU and memory limits
+- Temporary workspace configuration
 
 MongoDB may run locally inside the learning environment, but a managed
 MongoDB service is preferred for a production deployment.
 
-Exit Criteria
-A public GitHub repository can be analyzed.
-A branch, commit or subdirectory can be selected.
-Remote acquisition applies explicit security limits.
-Identical inputs reuse an existing snapshot.
-Long-running analyses expose an asynchronous job status.
-The application runs in a local Kubernetes cluster.
-Configuration and credentials are externalized.
-Architecture Decisions to Formalize
+### Exit Criteria
+
+- A public GitHub repository can be analyzed.
+- A branch, commit or subdirectory can be selected.
+- Remote acquisition applies explicit security limits.
+- Identical inputs reuse an existing snapshot.
+- Long-running analyses expose an asynchronous job status.
+- The application runs in a local Kubernetes cluster.
+- Configuration and credentials are externalized.
+
+## Future Technical Epic 3 — GCP Cloud Deployment
+
+### Status
+
+Deferred until Technical Epic 2 and Epic 7 are complete.
+
+### Intent
+
+Deploy Monolith Insight AI to Google Cloud Platform as a publicly accessible
+application using free or low-cost managed services whenever practical.
+
+This epic will move the application from a local Kubernetes learning
+environment to a real cloud environment with automated deployment,
+externalized configuration, observability and cost controls.
+
+### Topics to Evaluate
+
+- GCP application hosting options.
+- Container image storage and delivery.
+- Public API exposure, HTTPS and domain configuration.
+- MongoDB connectivity from GCP.
+- Secret and configuration management.
+- Continuous deployment from GitHub.
+- Centralized logs, metrics and tracing.
+- Resource scaling and cold-start behavior.
+- Budgets, quotas and cost alerts.
+- Infrastructure as Code.
+- Separation between development and production environments.
+
+### Planning Constraint
+
+The detailed stories and cloud architecture will be defined when the
+application has a stable analysis lifecycle, remote project support and
+mature architectural insights.
+
+Available GCP services, free-tier limits and expected operating costs must
+be reviewed at that time before selecting the deployment architecture.
+
+## Architecture Decisions to Formalize
 
 The following decisions may require Architecture Decision Records:
 
-MongoDB as the initial snapshot persistence technology.
-Aggregate document versus separated graph storage.
-Maximum supported analysis size.
-Fingerprint composition.
-GitHub repository acquisition mechanism.
-Synchronous versus asynchronous analysis.
-Managed MongoDB versus MongoDB inside Kubernetes.
+- MongoDB as the initial snapshot persistence technology.
+- Aggregate document versus separated graph storage.
+- Maximum supported analysis size.
+- Fingerprint composition.
+- GitHub repository acquisition mechanism.
+- Synchronous versus asynchronous analysis.
+- Managed MongoDB versus MongoDB inside Kubernetes.
