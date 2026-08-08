@@ -14,7 +14,7 @@ public final class ProjectGraphTestBuilder {
     private final List<ClassDependency> dependencies = new ArrayList<>();
 
 
-    private ProjectGraphTestBuilder() {
+    public ProjectGraphTestBuilder() {
     }
 
     public static ProjectGraphTestBuilder graph() {
