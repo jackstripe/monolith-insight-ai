@@ -70,13 +70,13 @@ class AnalyzeImpactUseCaseTest {
                 .addDependency("AuditService", "LegacyHelper")
                 .build();
 
+        String unknownClassId = "UnknownService";
         assertThatThrownBy(() ->
                 new AnalyzeImpactUseCase()
-                        .execute(graph, "UnkownService")
+                        .execute(graph, unknownClassId)
         )
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage( "Class not found in graph: " + "UnkownService"
-                );
+                .hasMessage("Class not found in graph: " + unknownClassId);
     }
 
     @Test
