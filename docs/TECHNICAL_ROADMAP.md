@@ -73,7 +73,7 @@ Persisted analysis snapshot
 REST response
 ```
 
-## Persistence Strategy
+### Persistence Strategy
 
 MongoDB is the initial persistence technology because an architecture
 analysis naturally forms a document containing metadata and nested reports.
@@ -95,6 +95,7 @@ GET  /api/projects/{projectId}/analyses/latest
 ```
 
 ### Exit Criteria
+
 - A complete architecture analysis can be generated through one use case.
 - The analysis is persisted in MongoDB.
 - Persisted analyses can be retrieved through REST endpoints.
@@ -103,6 +104,7 @@ GET  /api/projects/{projectId}/analyses/latest
 - Application and MongoDB can run together through Docker Compose.
 
 ### Out of Scope
+
 - Project content fingerprints.
 - Automatic snapshot reuse.
 - Remote GitHub repositories.
@@ -110,24 +112,27 @@ GET  /api/projects/{projectId}/analyses/latest
 - Kubernetes deployment.
 
 ## Technical Epic 2 — Remote Analysis, Idempotency and Kubernetes
+
 ### Objective
 
 Allow the application to safely analyze remote projects, avoid duplicate
 analyses and run in a Kubernetes environment.
 
 ### Stories
-TECH-010 — Define Project Source Abstraction
-TECH-011 — Analyze Public GitHub Repositories
-TECH-012 — Support Branch, Commit and Subdirectory Selection
-TECH-013 — Secure and Limit Remote Source Acquisition
-TECH-014 — Calculate Deterministic Project Fingerprints
-TECH-015 — Reuse Existing Analysis Snapshots Idempotently
-TECH-016 — Introduce Asynchronous Analysis Jobs
-TECH-017 — Add Application Health and Readiness Probes
-TECH-018 — Deploy the Application Locally with Kubernetes
-TECH-019 — Externalize Configuration and Secrets
+
+- TECH-010 — Define Project Source Abstraction
+- TECH-011 — Analyze Public GitHub Repositories
+- TECH-012 — Support Branch, Commit and Subdirectory Selection
+- TECH-013 — Secure and Limit Remote Source Acquisition
+- TECH-014 — Calculate Deterministic Project Fingerprints
+- TECH-015 — Reuse Existing Analysis Snapshots Idempotently
+- TECH-016 — Introduce Asynchronous Analysis Jobs
+- TECH-017 — Add Application Health and Readiness Probes
+- TECH-018 — Deploy the Application Locally with Kubernetes
+- TECH-019 — Externalize Configuration and Secrets
 
 ### Remote Analysis Request
+
 ```http
 POST /api/analyses/github
 ```

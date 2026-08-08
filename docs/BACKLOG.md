@@ -60,6 +60,8 @@
 
 ## Technical Epic 3 — GCP Cloud Deployment
 
+> Stories will be defined after Technical Epic 2 and Epic 7 are complete.
+
 ## Epic 8 — AI Integration
 
 - [ ] Define architectural analysis input
