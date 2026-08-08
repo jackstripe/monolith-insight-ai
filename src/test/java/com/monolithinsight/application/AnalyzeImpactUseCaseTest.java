@@ -14,7 +14,7 @@ class AnalyzeImpactUseCaseTest {
     @Test
     void shouldFindDirectAndTransitiveImpactedClasses() {
 
-        ProjectGraph graph = new ProjectGraphTestBuilder()
+        ProjectGraph graph = ProjectGraphTestBuilder.graph()
                 .addNode("OrderController")
                 .addNode("BatchProcessor")
                 .addNode("OrderService")
@@ -41,8 +41,9 @@ class AnalyzeImpactUseCaseTest {
     @Test
     void shouldReturnEmptyReportWhenNoClassesDependOnChangedClass(){
 
-        ProjectGraph graph = new ProjectGraphTestBuilder()
+        ProjectGraph graph = ProjectGraphTestBuilder.graph()
                 .addNode("OrderController")
+                .addNode("OrderService")
                 .addDependency("OrderController", "OrderService")
                 .build();
 
@@ -57,7 +58,7 @@ class AnalyzeImpactUseCaseTest {
     @Test
     void shouldRejectUnknownChangedClass() {
 
-        ProjectGraph graph = new ProjectGraphTestBuilder()
+        ProjectGraph graph = ProjectGraphTestBuilder.graph()
                 .addNode("OrderController")
                 .addNode("BatchProcessor")
                 .addNode("OrderService")
@@ -70,7 +71,7 @@ class AnalyzeImpactUseCaseTest {
                 .build();
 
         assertThatThrownBy(() ->
-                new FindReachableClassesUseCase()
+                new AnalyzeImpactUseCase()
                         .execute(graph, "UnkownService")
         )
                 .isInstanceOf(IllegalArgumentException.class)
@@ -80,7 +81,7 @@ class AnalyzeImpactUseCaseTest {
 
     @Test
     void shouldHandleCycleWithoutIncludingChangedClass() {
-        ProjectGraph graph = new ProjectGraphTestBuilder()
+        ProjectGraph graph = ProjectGraphTestBuilder.graph()
                 .addNode("OrderController")
                 .addNode("BatchProcessor")
                 .addNode("OrderService")

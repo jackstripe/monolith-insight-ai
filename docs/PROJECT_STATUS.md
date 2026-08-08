@@ -6,11 +6,11 @@ Epic 5 — Graph Traversal
 
 ## Current Story
 
-MON-005.2 — Impact Analysis
+MON-005.3 — Dependency Paths
 
 ## Last Completed Story
 
-MON-005.1 — Find Reachable Classes
+MON-005.2 — Impact Analysis
 
 ## Current Architecture
 
@@ -45,6 +45,8 @@ Architecture Insights
 - GenerateHotspotsReportUseCase
 - ReachabilityReport
 - FindReachableClassesUseCase
+- ImpactAnalysisReport 
+- AnalyzeImpactUseCase
 
 ## Important Decisions
 
@@ -69,7 +71,10 @@ Architecture Insights
 - Reachable classes are returned alphabetically by `classId`.
 - Visited-node tracking prevents duplicates and infinite traversal through cycles.
 - An unknown starting class produces an `IllegalArgumentException`.
+- Impact Analysis follows incoming class dependencies using breadth-first search.
+- The starting class is excluded from the impact analysis result.
+- Impact analysis classes are returned alphabetically by `classId`.
 
 ## Next Story
 
-MON-005.2 — Impact Analysis
+MON-005.3 — Dependency Paths
