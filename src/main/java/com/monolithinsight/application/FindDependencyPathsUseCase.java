@@ -5,7 +5,7 @@ import com.monolithinsight.domain.ProjectGraph;
 
 import java.util.List;
 
-public record FindDependencyPathsUseCase() {
+public class FindDependencyPathsUseCase {
 
     public DependencyPathsReport execute(
             ProjectGraph graph,

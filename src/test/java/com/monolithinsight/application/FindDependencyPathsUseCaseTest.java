@@ -1,21 +1,21 @@
 package com.monolithinsight.application;
 
 import com.monolithinsight.domain.ClassNode;
-import com.monolithinsight.domain.DependencyPath;
 import com.monolithinsight.domain.DependencyPathsReport;
 import com.monolithinsight.domain.ProjectGraph;
 import com.monolithinsight.support.ProjectGraphTestBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+import java.util.List;
+
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
-public class FindDependencyPathsUseCaseTest {
+class FindDependencyPathsUseCaseTest {
 
 
     @Test
-    void shouldReturnDependencyPathReport(){
+    void shouldFindAllDependencyPathsBetweenClasses(){
         //Arrange
         ProjectGraph graph = ProjectGraphTestBuilder.graph()
                 .addNode("A")
@@ -39,25 +39,14 @@ public class FindDependencyPathsUseCaseTest {
         //Assert
 
         assertThat(dependencyPathsReport.paths())
-                .extracting(DependencyPath::classes)
-                .extracting(ClassNode::id)
+                .extracting(
+                        path -> path.classes().stream()
+                                .map(ClassNode::id)
+                                .toList())
                 .containsExactly(
-                        tuple(
-                        "A",
-                                "B",
-                                "C",
-                                "D",
-                                "E"),
-                        tuple(
-                                "A",
-                                "B",
-                                "D",
-                                "E"),
-                        tuple(
-                                "A",
-                                "C",
-                                "D",
-                                "E")
+                        List.of("A", "B", "C", "D", "E"),
+                        List.of("A", "B", "D", "E"),
+                        List.of("A", "C", "D", "E")
                 );
     }
 }
