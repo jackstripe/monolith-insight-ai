@@ -94,13 +94,11 @@ public class FindDependencyPathsUseCase {
                             classesInCurrentPath,
                             paths);
                 }
-
-                //classesInCurrentPath.remove(currentClassId);
             }
-
         }
         currentPath.remove(currentPath.size() - 1);
         classesInCurrentPath.remove(currentClassId);
     }
+
 
 }
