@@ -63,7 +63,7 @@ class FindDependencyPathsUseCaseTest {
                 .addDependency("A", "C")
                 .addDependency("B", "C")
                 .addDependency("B", "D")
-                .addDependency("B", "D")
+                .addDependency("D", "B")
                 .addDependency("C", "D")
                 .addDependency("D", "E")
                 .build();
