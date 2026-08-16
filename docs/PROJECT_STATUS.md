@@ -6,11 +6,11 @@ Epic 5 — Graph Traversal
 
 ## Current Story
 
-MON-005.3 — Dependency Paths
+MON-005.4 — Shortest Dependency Path
 
 ## Last Completed Story
 
-MON-005.2 — Impact Analysis
+MON-005.3 — Dependency Paths
 
 ## Current Architecture
 
@@ -77,4 +77,4 @@ Architecture Insights
 
 ## Next Story
 
-MON-005.3 — Dependency Paths
+MON-005.4 — Shortest Dependency Path
