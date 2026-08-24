@@ -6,10 +6,6 @@ import com.monolithinsight.domain.DependencyType;
 import com.monolithinsight.domain.ProjectGraph;
 import com.monolithinsight.support.ProjectGraphTestBuilder;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -17,7 +13,6 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
 class FindDependencyPathsUseCaseTest {
-
 
     @Test
     void shouldFindAllDependencyPathsBetweenClasses(){

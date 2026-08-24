@@ -11,10 +11,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class FindShortestDependencyPathUseCaseTest {
+class FindShortestDependencyPathUseCaseTest {
 
     @Test
-    public void shouldFindShortestPath(){
+    void shouldFindShortestPath(){
 
 
         ProjectGraph graph = ProjectGraphTestBuilder.graph()
