@@ -17,7 +17,7 @@ public class FindShortestDependencyPathUseCase {
             String targetClassId
     ) {
         // BFS + predecessor map
-        Map<String, List<String>> adjacencyList;
+        Map<String, Set<String>> adjacencyList = new HashMap<>();
 
         Queue<String> pending = new ArrayDeque<>();
         Set<String> visited = new HashSet<>();
@@ -29,6 +29,15 @@ public class FindShortestDependencyPathUseCase {
                                 ClassNode::id,
                                 Function.identity()
                         ));
+
+        for (ClassDependency dependency : graph.dependencies()) {
+            adjacencyList
+                    .computeIfAbsent(
+                            dependency.sourceNodeId(),
+                            ignored -> new TreeSet<>()
+                    )
+                    .add(dependency.targetNodeId());
+        }
 
         if (!nodesById.containsKey(sourceClassId)) {
             throw new IllegalArgumentException(
@@ -42,34 +51,38 @@ public class FindShortestDependencyPathUseCase {
             );
         }
 
+        if (sourceClassId.equals(targetClassId)) {
+            return Optional.of(
+                    new DependencyPath(
+                            List.of(nodesById.get(sourceClassId))
+                    )
+            );
+        }
+
         pending.add(sourceClassId);
         visited.add(sourceClassId);
 
         while(!pending.isEmpty()){
-            String next = pending.element();
-            List<ClassDependency> dep =  graph.dependencies().stream()
-                    .filter(
-                            dependecy -> dependecy.sourceNodeId()
-                            .equals(next))
-                    /*.forEach(dependency -> {if(visited.add(dependency.targetNodeId() );{
-                                previousClassById.put(dependency.targetNodeId(), sourceClassId);
-                        }
-                    })*/
+            String currentClassId = pending.remove();
+            for (String neighbour : adjacencyList.getOrDefault( currentClassId, Collections.emptySet() )) {
+                if(visited.add(neighbour)){
+                    previousClassById.put(neighbour, currentClassId);
+                    pending.add(neighbour);
+                    if (neighbour.equals(targetClassId)) {
 
-                    .toList();
-            for(int i = 0; i < dep.size(); i++){
-                if(visited.add(dep.get(i).targetNodeId())){
-                    previousClassById.put(dep.get(i).targetNodeId(), next);
-                    pending.add(dep.get(i).targetNodeId());
+                        LinkedList<ClassNode> path = new LinkedList<>();
+                        String reconsctructClassId = targetClassId;
+                        while(!reconsctructClassId.equals(sourceClassId)){
+                            path.addFirst(nodesById.get(reconsctructClassId));
+                            reconsctructClassId = previousClassById.get(reconsctructClassId);
+                        }
+                        path.addFirst(nodesById.get(sourceClassId));
+                        return Optional.of(new DependencyPath(path));
+                    }
                 }
             }
-            pending.remove(next);
         }
-        return Optional.of(
-                new DependencyPath(List.of(
-                        nodesById.get(sourceClassId),
-                        nodesById.get(targetClassId)
-                ))
-        );
+
+        return Optional.empty();
     }
 }

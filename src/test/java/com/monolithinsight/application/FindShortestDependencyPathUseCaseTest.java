@@ -26,6 +26,7 @@ class FindShortestDependencyPathUseCaseTest {
                 .addNode("F")
                 .addDependency("A", "B")
                 .addDependency("A", "C")
+                .addDependency("B", "C")
                 .addDependency("B", "D")
                 .addDependency("C", "E")
                 .addDependency("D", "F")
