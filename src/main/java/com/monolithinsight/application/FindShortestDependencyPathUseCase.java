@@ -67,22 +67,33 @@ public class FindShortestDependencyPathUseCase {
             for (String neighbour : adjacencyList.getOrDefault( currentClassId, Collections.emptySet() )) {
                 if(visited.add(neighbour)){
                     previousClassById.put(neighbour, currentClassId);
-                    pending.add(neighbour);
                     if (neighbour.equals(targetClassId)) {
-
-                        LinkedList<ClassNode> path = new LinkedList<>();
-                        String reconsctructClassId = targetClassId;
-                        while(!reconsctructClassId.equals(sourceClassId)){
-                            path.addFirst(nodesById.get(reconsctructClassId));
-                            reconsctructClassId = previousClassById.get(reconsctructClassId);
-                        }
-                        path.addFirst(nodesById.get(sourceClassId));
-                        return Optional.of(new DependencyPath(path));
+                        return Optional.of(reconstructPath(sourceClassId,targetClassId, previousClassById,nodesById));
                     }
+                    pending.add(neighbour);
                 }
             }
         }
 
         return Optional.empty();
+    }
+
+    private DependencyPath reconstructPath(
+            String sourceClassId,
+            String targetClassId,
+            Map<String, String> previousClassById,
+            Map<String, ClassNode> nodesById
+    ) {
+        LinkedList<ClassNode> path = new LinkedList<>();
+        String pathClassId = targetClassId;
+
+        while (!pathClassId.equals(sourceClassId)) {
+            path.addFirst(nodesById.get(pathClassId));
+            pathClassId = previousClassById.get(pathClassId);
+        }
+
+        path.addFirst(nodesById.get(sourceClassId));
+
+        return new DependencyPath(path);
     }
 }

@@ -6,6 +6,7 @@ import com.monolithinsight.domain.DependencyType;
 import com.monolithinsight.domain.ProjectGraph;
 import com.monolithinsight.support.ProjectGraphTestBuilder;
 import org.junit.jupiter.api.Test;
+
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -13,6 +14,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 
 class FindDependencyPathsUseCaseTest {
+
 
     @Test
     void shouldFindAllDependencyPathsBetweenClasses(){
@@ -144,10 +146,6 @@ class FindDependencyPathsUseCaseTest {
 
     @Test
     void shouldRejectUnknownSourceClass(){
-
-
-
-
         ProjectGraph graph = ProjectGraphTestBuilder.graph()
                 .addNode("A")
                 .addNode("B")
