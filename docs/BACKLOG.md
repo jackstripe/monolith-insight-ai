@@ -16,8 +16,8 @@
 - [x] TECH-001 — Reusable ProjectGraph Test Builder
 - [x] MON-005.2 — Impact Analysis
 - [x] MON-005.3 — Dependency Paths
-- [ ] MON-005.4 — Shortest Dependency Path
-- [ ] MON-005.5 — Reverse Dependency Analysis
+- [x] MON-005.4 — Shortest Dependency Path
+- [x] MON-005.5 — Reverse Dependency Analysis _(covered by MON-005.2 — Impact Analysis)_
 
 ## Technical Epic 1 — Analysis Lifecycle, Persistence & Containers
 

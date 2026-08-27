@@ -2,15 +2,15 @@
 
 ## Current Iteration
 
-Epic 5 — Graph Traversal
+Technical Epic 1 — Analysis Lifecycle, Persistence & Containers
 
 ## Current Story
 
-MON-005.4 — Shortest Dependency Path
+TECH-002 — Define Aggregate Architecture Analysis Report
 
 ## Last Completed Story
 
-MON-005.3 — Dependency Paths
+MON-005.4 — Shortest Dependency Path
 
 ## Current Architecture
 
@@ -47,6 +47,11 @@ Architecture Insights
 - FindReachableClassesUseCase
 - ImpactAnalysisReport 
 - AnalyzeImpactUseCase
+- ProjectGraphTestBuilder
+- DependencyPath
+- DependencyPathsReport
+- FindDependencyPathsUseCase
+- FindShortestDependencyPathUseCase
 
 ## Important Decisions
 
@@ -74,7 +79,17 @@ Architecture Insights
 - Impact Analysis follows incoming class dependencies using breadth-first search.
 - The starting class is excluded from the impact analysis result.
 - Impact analysis classes are returned alphabetically by `classId`.
+- Dependency paths are enumerated with depth-first search and backtracking.
+- Nodes in the current DFS path are tracked separately so cycles are skipped without blocking valid alternative paths.
+- Dependency paths contain both their source and target classes.
+- Duplicate dependency types between the same two classes do not duplicate paths.
+- Shortest dependency paths are found using breadth-first search.
+- A predecessor map is used to reconstruct the shortest path from target to source.
+- Shortest-path neighbors are processed alphabetically for deterministic tie-breaking.
+- A missing shortest path is represented by `Optional.empty()`.
+- Reverse dependency analysis is already provided by `AnalyzeImpactUseCase` from MON-005.2.
+- MON-005.5 was closed as a duplicate of MON-005.2 instead of introducing a second implementation.
 
 ## Next Story
 
-MON-005.4 — Shortest Dependency Path
+TECH-002 — Define Aggregate Architecture Analysis Report
