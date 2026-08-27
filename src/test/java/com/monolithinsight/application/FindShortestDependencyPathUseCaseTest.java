@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -32,7 +31,6 @@ class FindShortestDependencyPathUseCaseTest {
                 .addDependency("D", "F")
                 .addDependency("E", "F")
                 .addDependency("C", "F")
-                .addDependency("D", "F")
                 .build();
 
         Optional<DependencyPath> result =
@@ -76,8 +74,7 @@ class FindShortestDependencyPathUseCaseTest {
                 new FindShortestDependencyPathUseCase()
                         .execute(graph, "A", "H");
 
-        assertThat(result)
-                .isEqualTo(Optional.empty());
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -137,7 +134,7 @@ class FindShortestDependencyPathUseCaseTest {
                 .build();
 
         assertThatThrownBy(() ->
-                new FindDependencyPathsUseCase()
+                new FindShortestDependencyPathUseCase()
                         .execute(graph, "FALSE", "B")
         )
                 .isInstanceOf(IllegalArgumentException.class)
@@ -166,7 +163,7 @@ class FindShortestDependencyPathUseCaseTest {
                 .build();
 
         assertThatThrownBy(() ->
-                new FindDependencyPathsUseCase()
+                new FindShortestDependencyPathUseCase()
                         .execute(graph, "A", "FALSE")
         )
                 .isInstanceOf(IllegalArgumentException.class)
@@ -217,24 +214,15 @@ class FindShortestDependencyPathUseCaseTest {
                 .addNode("B")
                 .addNode("C")
                 .addNode("D")
-                .addNode("E")
-                .addNode("F")
-                .addDependency("A", "B")
                 .addDependency("A", "C")
-                .addDependency("A", "D")
-                .addDependency("B", "C")
+                .addDependency("A", "B")
+                .addDependency("C", "D")
                 .addDependency("B", "D")
-                .addDependency("D", "F")
-                .addDependency("C", "E")
-                .addDependency("D", "F")
-                .addDependency("E", "F")
-                .addDependency("C", "F")
-                .addDependency("D", "F")
                 .build();
 
         Optional<DependencyPath> result =
                 new FindShortestDependencyPathUseCase()
-                        .execute(graph, "A", "F");
+                        .execute(graph, "A", "D");
 
         assertThat(result)
                 .isPresent()
@@ -244,6 +232,8 @@ class FindShortestDependencyPathUseCaseTest {
                                 .map(ClassNode::id)
                                 .toList()
                 )
-                .isEqualTo(List.of("A", "C", "F"));
+                .isEqualTo(List.of("A", "B", "D"));
     }
+
+
 }

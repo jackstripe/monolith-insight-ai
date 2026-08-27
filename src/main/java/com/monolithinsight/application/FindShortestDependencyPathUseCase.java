@@ -68,7 +68,11 @@ public class FindShortestDependencyPathUseCase {
                 if(visited.add(neighbour)){
                     previousClassById.put(neighbour, currentClassId);
                     if (neighbour.equals(targetClassId)) {
-                        return Optional.of(reconstructPath(sourceClassId,targetClassId, previousClassById,nodesById));
+                        return Optional.of(reconstructPath(
+                                sourceClassId,
+                                targetClassId,
+                                previousClassById,
+                                nodesById));
                     }
                     pending.add(neighbour);
                 }
