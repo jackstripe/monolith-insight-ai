@@ -1,5 +1,5 @@
 package com.monolithinsight.domain;
-git add .
+
 import java.time.Instant;
 import java.util.List;
 
