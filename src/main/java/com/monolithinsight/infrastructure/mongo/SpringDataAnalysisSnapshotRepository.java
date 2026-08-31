@@ -1,4 +1,4 @@
-package com.monolithinsight.persistence.mongo;
+package com.monolithinsight.infrastructure.mongo;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 

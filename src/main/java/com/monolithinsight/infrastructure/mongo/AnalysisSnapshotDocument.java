@@ -1,4 +1,4 @@
-package com.monolithinsight.persistence.mongo;
+package com.monolithinsight.infrastructure.mongo;
 
 import com.monolithinsight.domain.ArchitectureAnalysisReport;
 import org.springframework.data.annotation.Id;

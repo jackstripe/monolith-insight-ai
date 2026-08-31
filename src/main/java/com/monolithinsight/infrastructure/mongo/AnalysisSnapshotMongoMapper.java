@@ -1,10 +1,10 @@
-package com.monolithinsight.persistence.mongo;
+package com.monolithinsight.infrastructure.mongo;
 
 import com.monolithinsight.domain.AnalysisSnapshot;
 
-final class AnalysisSnapshotMongoMapper {
+public final class AnalysisSnapshotMongoMapper {
 
-    AnalysisSnapshotDocument toDocument(AnalysisSnapshot snapshot) {
+    public AnalysisSnapshotDocument toDocument(AnalysisSnapshot snapshot) {
         return new AnalysisSnapshotDocument(
                 snapshot.analysisId(),
                 snapshot.projectId(),

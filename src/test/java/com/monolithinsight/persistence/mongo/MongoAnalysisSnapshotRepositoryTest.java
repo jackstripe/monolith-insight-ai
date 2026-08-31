@@ -1,6 +1,10 @@
 package com.monolithinsight.persistence.mongo;
 
 import com.monolithinsight.domain.*;
+import com.monolithinsight.infrastructure.mongo.AnalysisSnapshotDocument;
+import com.monolithinsight.infrastructure.mongo.AnalysisSnapshotMongoMapper;
+import com.monolithinsight.infrastructure.mongo.MongoAnalysisSnapshotRepository;
+import com.monolithinsight.infrastructure.mongo.SpringDataAnalysisSnapshotRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
