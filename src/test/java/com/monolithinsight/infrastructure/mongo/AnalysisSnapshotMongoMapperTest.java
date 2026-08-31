@@ -1,8 +1,6 @@
-package com.monolithinsight.persistence.mongo;
+package com.monolithinsight.infrastructure.mongo;
 
 import com.monolithinsight.domain.*;
-import com.monolithinsight.infrastructure.mongo.AnalysisSnapshotDocument;
-import com.monolithinsight.infrastructure.mongo.AnalysisSnapshotMongoMapper;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;

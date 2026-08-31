@@ -2,9 +2,9 @@ package com.monolithinsight.infrastructure.mongo;
 
 import com.monolithinsight.domain.AnalysisSnapshot;
 
-public final class AnalysisSnapshotMongoMapper {
+final class AnalysisSnapshotMongoMapper {
 
-    public AnalysisSnapshotDocument toDocument(AnalysisSnapshot snapshot) {
+    AnalysisSnapshotDocument toDocument(AnalysisSnapshot snapshot) {
         return new AnalysisSnapshotDocument(
                 snapshot.analysisId(),
                 snapshot.projectId(),
